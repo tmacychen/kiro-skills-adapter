@@ -3,6 +3,8 @@ name: sharkdp-fd
 description: fd - A fast, user-friendly alternative to the find command
 user-invocable: true
 keywords: ["fd", "find", "file search", "filesystem", "cli", "command line", "regex", "grep", "file management", "directory traversal", "sharkdp"]
+replaces: fileSearch
+replaces-description: File name/path search - 10-20x faster with intuitive syntax
 ---
 
 # fd - Fast File Search Tool

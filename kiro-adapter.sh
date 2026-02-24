@@ -1,9 +1,17 @@
 #!/bin/bash
 # Kiro Skills Adapter
-# Converts skills from ~/.kiro/skills to Kiro powers format in ~/.kiro/powers/installed/
+# Converts skills from current directory or ~/.kiro/skills to Kiro powers format in ~/.kiro/powers/installed/
 # Supports both single SKILL.md and nested skills/ subdirectory structures
 
+# Use current directory if it contains SKILL.md files, otherwise use ~/.kiro/skills
+CURRENT_DIR="$(pwd)"
 SKILLS_SRC="$HOME/.kiro/skills"
+
+# Check if current directory has any SKILL.md files
+if find "$CURRENT_DIR" -maxdepth 3 -name "SKILL.md" -type f 2>/dev/null | grep -q .; then
+    SKILLS_SRC="$CURRENT_DIR"
+fi
+
 POWERS_DIR="$HOME/.kiro/powers"
 INSTALLED_DIR="$POWERS_DIR/installed"
 INSTALLED_JSON="$POWERS_DIR/installed.json"
@@ -107,6 +115,93 @@ create_steering() {
     fi
 }
 
+# Copy tool-preferences.md if it exists in the skill directory
+copy_tool_preferences() {
+    local skill_dir="$1"
+    local skill_name="$2"
+    local steering_dir="$INSTALLED_DIR/$skill_name/steering"
+    
+    if [ -f "$skill_dir/tool-preferences.md" ]; then
+        cp "$skill_dir/tool-preferences.md" "$steering_dir/tool-preferences.md"
+        echo -e "  ${GREEN}✓${NC} Copied tool-preferences.md"
+        return 0
+    fi
+    return 1
+}
+
+# Generate tool-preferences.md from SKILL.md frontmatter if 'replaces' field exists
+generate_tool_preferences() {
+    local skill_dir="$1"
+    local skill_name="$2"
+    local steering_dir="$INSTALLED_DIR/$skill_name/steering"
+    
+    local skill_file="$skill_dir/SKILL.md"
+    [ -f "$skill_file" ] || return 1
+    
+    local frontmatter=$(extract_frontmatter "$skill_file")
+    local replaces=$(echo "$frontmatter" | grep "^replaces:" | sed 's/replaces: *//' | tr -d '"')
+    local replaces_desc=$(echo "$frontmatter" | grep "^replaces-description:" | sed 's/replaces-description: *//' | tr -d '"')
+    local name=$(echo "$frontmatter" | grep "^name:" | sed 's/name: *//' | tr -d '"')
+    local desc=$(echo "$frontmatter" | grep "^description:" | sed 's/description: *//' | tr -d '"')
+    
+    # Only generate if replaces field exists
+    [ -z "$replaces" ] && return 1
+    [ -z "$name" ] && name="$skill_name"
+    [ -z "$desc" ] && desc="A tool for $skill_name"
+    [ -z "$replaces_desc" ] && replaces_desc="Replaces built-in $replaces tool"
+    
+    # Determine tool command based on skill name
+    local tool_cmd="$name"
+    case "$name" in
+        ripgrep) tool_cmd="rg" ;;
+        sharkdp-fd) tool_cmd="fd" ;;
+    esac
+    
+    # Generate tool-preferences.md
+    cat > "$steering_dir/tool-preferences.md" <<EOF
+---
+inclusion: auto
+---
+
+# Tool Usage Preferences
+
+This file was automatically generated from SKILL.md frontmatter.
+
+## $name Tool Preference
+
+**ALWAYS prefer \`$tool_cmd\` over built-in \`$replaces\` tool.**
+
+$replaces_desc
+
+When using this tool:
+- Use \`$tool_cmd\` command via \`executeBash\` tool
+- Leverage the tool's performance and features
+- Refer to the skill documentation for detailed usage patterns
+
+**Only use \`$replaces\` when:**
+- \`$tool_cmd\` is not available or fails
+- You need IDE-specific structured output for further processing
+
+## Rationale
+
+$desc
+
+This tool provides:
+- Better performance than built-in alternatives
+- Smart defaults (respects .gitignore, skips binary files)
+- Rich feature set with intuitive syntax
+- Colored output for better readability
+
+## Usage
+
+For detailed usage examples and options, refer to the skill documentation in \`skill.md\`.
+
+EOF
+    
+    echo -e "  ${GREEN}✓${NC} Generated tool-preferences.md from SKILL.md"
+    return 0
+}
+
 # Process a single skill directory and register it
 process_skill() {
     local skill_dir="$1"
@@ -129,6 +224,12 @@ process_skill() {
     # Create steering
     create_steering "$skill_dir" "$skill_name"
     echo -e "  ${GREEN}✓${NC} Created steering"
+    
+    # Copy or generate tool-preferences
+    # Priority: 1. Copy existing file, 2. Generate from SKILL.md frontmatter
+    if ! copy_tool_preferences "$skill_dir" "$skill_name"; then
+        generate_tool_preferences "$skill_dir" "$skill_name"
+    fi
     
     # Get description from frontmatter
     local frontmatter=$(extract_frontmatter "$skill_dir/SKILL.md")

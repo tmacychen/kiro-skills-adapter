@@ -3,6 +3,8 @@ name: ripgrep
 description: ripgrep (rg) - A fast line-oriented search tool that recursively searches directories for regex patterns
 user-invocable: true
 keywords: ["ripgrep", "rg", "grep", "search", "regex", "cli", "command line", "file search", "text search", "gitignore", "recursive search"]
+replaces: grepSearch
+replaces-description: Text/code content search - 10-20x faster with smart defaults
 ---
 
 # ripgrep (rg)
