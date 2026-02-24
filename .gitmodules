@@ -1,0 +1,6 @@
+[submodule "Second-Me-Skills"]
+	path = Second-Me-Skills
+	url = https://github.com/mindverse/Second-Me-Skills.git
+[submodule "rust-skills"]
+	path = rust-skills
+	url = https://github.com/actionbook/rust-skills
