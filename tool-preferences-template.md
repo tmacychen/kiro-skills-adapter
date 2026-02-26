@@ -1,4 +1,5 @@
 ---
+description: "Tool usage preferences and custom tool configurations"
 inclusion: auto
 ---
 
@@ -22,6 +23,7 @@ The migration script will automatically copy it to the power's steering director
 
 ```markdown
 ---
+description: "Tool usage preferences for [your tool name]"
 inclusion: auto
 ---
 

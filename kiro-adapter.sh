@@ -160,6 +160,7 @@ generate_tool_preferences() {
     # Generate tool-preferences.md
     cat > "$steering_dir/tool-preferences.md" <<EOF
 ---
+description: "Tool usage preferences for $name - replaces $replaces"
 inclusion: auto
 ---
 
