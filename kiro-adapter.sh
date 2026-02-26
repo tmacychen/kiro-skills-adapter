@@ -120,10 +120,25 @@ copy_tool_preferences() {
     local skill_dir="$1"
     local skill_name="$2"
     local steering_dir="$INSTALLED_DIR/$skill_name/steering"
-    
+
     if [ -f "$skill_dir/tool-preferences.md" ]; then
         cp "$skill_dir/tool-preferences.md" "$steering_dir/tool-preferences.md"
         echo -e "  ${GREEN}✓${NC} Copied tool-preferences.md"
+        return 0
+    fi
+    return 1
+}
+
+# Copy tool-preferences.md to global ~/.kiro/steering/ directory
+copy_tool_preferences_to_global() {
+    local skill_name="$1"
+    local steering_dir="$INSTALLED_DIR/$skill_name/steering"
+    local global_steering_dir="$HOME/.kiro/steering"
+
+    if [ -f "$steering_dir/tool-preferences.md" ]; then
+        mkdir -p "$global_steering_dir"
+        cp "$steering_dir/tool-preferences.md" "$global_steering_dir/${skill_name}-tool-preferences.md"
+        echo -e "  ${GREEN}✓${NC} Copied tool-preferences.md to global steering"
         return 0
     fi
     return 1
@@ -231,6 +246,9 @@ process_skill() {
     if ! copy_tool_preferences "$skill_dir" "$skill_name"; then
         generate_tool_preferences "$skill_dir" "$skill_name"
     fi
+
+    # Copy tool-preferences to global steering directory
+    copy_tool_preferences_to_global "$skill_name"
     
     # Get description from frontmatter
     local frontmatter=$(extract_frontmatter "$skill_dir/SKILL.md")
@@ -322,6 +340,11 @@ default_agent="$HOME/.kiro/agents/default.json"
 if [ -f "$default_agent" ]; then
     # Update resources path to match new structure
     sed -i '' 's|"skill://.*"|"skill://~/.kiro/powers/installed/*/steering/skill.md"|g' "$default_agent"
+    # Also add tool-preferences to resources if not already present
+    if ! grep -q "tool-preferences" "$default_agent"; then
+        tmp=$(mktemp)
+        jq '.resources += ["steering://~/.kiro/steering/*-tool-preferences.md"]' "$default_agent" > "$tmp" && mv "$tmp" "$default_agent"
+    fi
     echo -e "  ${GREEN}✓${NC} Updated $default_agent"
 else
     # Create default agent config
@@ -332,7 +355,8 @@ else
   "description": "Default agent with all tools and imported skills",
   "tools": ["*"],
   "resources": [
-    "skill://~/.kiro/powers/installed/*/steering/skill.md"
+    "skill://~/.kiro/powers/installed/*/steering/skill.md",
+    "steering://~/.kiro/steering/*-tool-preferences.md"
   ]
 }
 EOF
