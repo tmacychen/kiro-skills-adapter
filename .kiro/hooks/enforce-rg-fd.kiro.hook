@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Enforce rg/fd Tool Usage",
+  "description": "Intercepts fileSearch and grepSearch calls, asks agent to use fd/rg instead\"",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "fileSearch",
+      "grepSearch"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "You are about to use a built-in search tool (fileSearch or grepSearch). \n\nAccording to tool-preferences.md steering rules, you MUST use shell commands instead:\n- For file search: use `fd \"pattern\" --type f` via executeBash\n- For text search: use `rg \"pattern\" -g \"*.ext\"` via executeBash\n\nPlease retry using the appropriate shell command (fd or rg) instead of the built-in tool. Only use the built-in tool if fd/rg is unavailable (command not found)."
+  }
+}

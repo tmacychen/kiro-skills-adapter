@@ -623,47 +623,137 @@ generate_tool_preferences() {
         sharkdp-fd) tool_cmd="fd" ;;
     esac
     
-    # Generate tool-preferences.md
-    cat > "$steering_dir/tool-preferences.md" <<EOF
+    # Generate tool-preferences.md with mandatory rules - tool-specific content
+    if [ "$name" = "ripgrep" ]; then
+        # ripgrep-specific content
+        cat > "$steering_dir/tool-preferences.md" <<EOF
 ---
-description: "Tool usage preferences for $name - replaces $replaces"
-inclusion: auto
+description: "Tool usage rules for ripgrep - MUST use rg instead of grepSearch"
+inclusion: always
 ---
 
-# Tool Usage Preferences
+# ripgrep (rg) Tool Usage Rules
 
-This file was automatically generated from SKILL.md frontmatter.
+You MUST follow these rules when searching for text patterns.
 
-## $name Tool Preference
+## Mandatory Rules
 
-**ALWAYS prefer \`$tool_cmd\` over built-in \`$replaces\` tool.**
+### Text Search
+When searching for text patterns in files, you MUST use the \`rg\` command via executeBash:
 
-$replaces_desc
+\`\`\`bash
+rg "pattern" -g "*.ext"
+rg "pattern" --type rust
+rg "pattern" /path/to/dir
+\`\`\`
 
-When using this tool:
-- Use \`$tool_cmd\` command via \`executeBash\` tool
-- Leverage the tool's performance and features
-- Refer to the skill documentation for detailed usage patterns
+**DO NOT use:** \`grepSearch\`
 
-**Only use \`$replaces\` when:**
-- \`$tool_cmd\` is not available or fails
-- You need IDE-specific structured output for further processing
+## Fallback Rule (ACCEPTABLE)
+
+If \`rg\` is **unavailable** (command not found, exit code non-zero), THEN you MAY use \`grepSearch\`.
+
+**This is the ONLY case where using built-in tools is acceptable.**
 
 ## Rationale
 
 $desc
 
 This tool provides:
-- Better performance than built-in alternatives
-- Smart defaults (respects .gitignore, skips binary files)
-- Rich feature set with intuitive syntax
-- Colored output for better readability
+- ~10x faster than grep
+- Respects .gitignore automatically
+- Smart case sensitivity
+- Rich output options (--json, --color, etc.)
 
 ## Usage
 
-For detailed usage examples and options, refer to the skill documentation in \`skill.md\`.
+For detailed usage examples, refer to the skill documentation in \`skill.md\`.
 
 EOF
+    elif [ "$name" = "sharkdp-fd" ]; then
+        # fd-specific content
+        cat > "$steering_dir/tool-preferences.md" <<EOF
+---
+description: "Tool usage rules for sharkdp-fd - MUST use fd instead of fileSearch"
+inclusion: always
+---
+
+# fd Tool Usage Rules
+
+You MUST follow these rules when searching for files by name or pattern.
+
+## Mandatory Rules
+
+### File Search
+When searching for files by name or pattern, you MUST use the \`fd\` command via executeBash:
+
+\`\`\`bash
+fd "pattern" --type f
+fd "pattern" --type d
+fd -g "*.ext"
+\`\`\`
+
+**DO NOT use:** \`fileSearch\`
+
+## Fallback Rule (ACCEPTABLE)
+
+If \`fd\` is **unavailable** (command not found, exit code non-zero), THEN you MAY use \`fileSearch\`.
+
+**This is the ONLY case where using built-in tools is acceptable.**
+
+## Rationale
+
+$desc
+
+This tool provides:
+- ~10-20x faster than find
+- Intuitive syntax
+- Respects .gitignore
+- Colored output
+
+## Usage
+
+For detailed usage examples, refer to the skill documentation in \`skill.md\`.
+
+EOF
+    else
+        # Generic content for other tools
+        cat > "$steering_dir/tool-preferences.md" <<EOF
+---
+description: "Tool usage rules for $name - MUST use $tool_cmd instead of $replaces"
+inclusion: always
+---
+
+# $name Tool Usage Rules
+
+You MUST follow these rules when using this tool.
+
+## Mandatory Rules
+
+When searching for files or text, you MUST use the \`$tool_cmd\` command via executeBash:
+
+\`\`\`bash
+$tool_cmd "pattern"
+\`\`\`
+
+**DO NOT use:** \`$replaces\`
+
+## Fallback Rule (ACCEPTABLE)
+
+If \`$tool_cmd\` is **unavailable** (command not found, exit code non-zero), THEN you MAY use \`$replaces\`.
+
+**This is the ONLY case where using built-in tools is acceptable.**
+
+## Rationale
+
+$desc
+
+## Usage
+
+For detailed usage examples, refer to the skill documentation in \`skill.md\`.
+
+EOF
+    fi
     
     echo -e "  ${GREEN}✓${NC} Generated tool-preferences.md from SKILL.md"
     return 0
@@ -902,7 +992,8 @@ for power_dir in "$INSTALLED_DIR"/*; do
         
         # Try to extract tool command and replaces info
         tool_cmd=$(grep -o '`[a-z0-9-]*`' "$local_tp" | head -1 | tr -d '`')
-        replaces=$(echo "$desc" | grep -o "replaces [a-zA-Z]*" | sed 's/replaces //')
+        # Handle both "replaces X" and "instead of X" patterns
+        replaces=$(echo "$desc" | grep -oE "(replaces|instead of) [a-zA-Z]+" | sed 's/.* //')
         
         if [ -n "$tool_cmd" ] && [ -n "$replaces" ]; then
             ((tool_count++))
@@ -1247,6 +1338,41 @@ else
 EOF
     echo -e "  ${GREEN}✓${NC} Created $default_agent"
 fi
+
+# Create enforce-rg-fd hook if not exists
+create_enforce_rg_fd_hook() {
+    local hooks_dir="$HOME/.kiro/hooks"
+    local hook_file="$hooks_dir/enforce-rg-fd.kiro.hook"
+    mkdir -p "$hooks_dir"
+    
+    if [ -f "$hook_file" ]; then
+        echo -e "  ${GRAY}✓${NC} Hook already exists: enforce-rg-fd"
+        return 0
+    fi
+    
+    cat > "$hook_file" <<'EOF'
+{
+  "enabled": true,
+  "name": "Enforce rg/fd Tool Usage",
+  "description": "Intercepts fileSearch and grepSearch calls, asks agent to use fd/rg instead",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "fileSearch",
+      "grepSearch"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "You are about to use a built-in search tool (fileSearch or grepSearch). \n\nAccording to tool-preferences.md steering rules, you MUST use shell commands instead:\n- For file search: use `fd \"pattern\"` via executeBash\n- For text search: use `rg \"pattern\" -g \"*.ext\"` via executeBash\n\nPlease retry using the appropriate shell command (fd or rg) instead of the built-in tool. Only use the built-in tool if fd/rg is unavailable (command not found)."
+  }
+}
+EOF
+    echo -e "  ${GREEN}✓${NC} Created hook: enforce-rg-fd"
+}
+
+create_enforce_rg_fd_hook
 
 echo
 echo "Powers are in: $INSTALLED_DIR"
