@@ -870,6 +870,7 @@ for skill_dir in "$SKILLS_SRC"/*; do
     # Skip adapter and non-skill files
     [[ "$name" == "kiro-adapter.sh" ]] && continue
     [[ "$name" == "power-promot.txt" ]] && continue
+    [[ "$name" == "dogfood" ]] && continue  # Skip dogfood directory
     
     # Case 1: Single SKILL.md at root
     if [ -f "$skill_dir/SKILL.md" ]; then

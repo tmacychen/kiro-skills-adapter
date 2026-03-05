@@ -12,6 +12,7 @@
 - ✅ **工具偏好设置**: 自动生成和管理工具偏好配置
 - ✅ **技能索引**: 创建完整的技能资源索引
 - ✅ **符合规范**: 遵循 Kiro 官方 Steering 和 Skills 标准
+- ✅ **Submodule 支持**: 支持 Git submodule 形式的技能仓库
 
 ## 快速开始
 
@@ -50,24 +51,37 @@ chmod +x fix-steering-skills.sh
 
 ### 输入结构
 
-脚本支持两种技能目录结构：
+脚本支持三种技能目录结构：
 
 ```
 ~/.kiro/skills/                    # 或当前目录
-├── ripgrep/
+├── ripgrep/                       # 单个技能
 │   ├── SKILL.md                   # 必需
 │   └── tool-preferences.md        # 可选
-├── agent-browser/
-│   ├── SKILL.md
-│   ├── references/                # 参考文档
-│   └── templates/                 # 模板文件
-└── rust-skills/
+├── agent-browser/                 # Git submodule
+│   └── skills/                    # 嵌套 skills 目录
+│       ├── agent-browser/
+│       │   ├── SKILL.md
+│       │   ├── references/        # 参考文档
+│       │   └── templates/         # 模板文件
+│       ├── dogfood/
+│       │   └── SKILL.md
+│       ├── electron/
+│       │   └── SKILL.md
+│       └── slack/
+│           └── SKILL.md
+└── rust-skills/                   # Git submodule
     └── skills/                    # 嵌套结构
         ├── coding-guidelines/
         │   └── SKILL.md
         └── domain-web/
             └── SKILL.md
 ```
+
+**说明**:
+- **单个技能**: 包含 `SKILL.md` 的目录直接安装
+- **Git submodule**: 如果包含 `skills/` 子目录，会递归处理所有子技能
+- **嵌套结构**: 子技能名称会添加父目录前缀（如 `agent-browser-agent-browser`）
 
 ### 输出结构
 

@@ -4,3 +4,6 @@
 [submodule "rust-skills"]
 	path = rust-skills
 	url = https://github.com/actionbook/rust-skills
+[submodule "agent-browser"]
+	path = agent-browser
+	url = https://github.com/vercel-labs/agent-browser.git
