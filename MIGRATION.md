@@ -1,120 +1,37 @@
 # 迁移指南
 
-## 从旧版本迁移到新版本
+## 从旧版本迁移
 
-如果你之前运行过旧版本的 `kiro-adapter.sh`，需要进行迁移以符合 Kiro 官方规范。
+如果你之前使用过旧版本的 `kiro-adapter.sh`，建议运行修复命令以确保配置正确。
 
-## 快速迁移（推荐）
+## 快速迁移
 
 ```bash
 # 1. 更新代码
 git pull
 
-# 2. 运行修复脚本
-./fix-steering-skills.sh
+# 2. 运行修复（可选，推荐）
+./kiro-adapter.sh --fix
 
-# 3. 重启 Kiro
+# 3. 正常使用
+./kiro-adapter.sh
 ```
 
-就这么简单！修复脚本会自动处理所有迁移工作。
+## --fix 功能说明
 
-## 手动迁移
+`--fix` 选项会：
 
-如果你想手动迁移，按照以下步骤：
+1. **修复 Steering 配置**
+   - 对比文件内容与标准模板
+   - 不一致则重新生成（创建 `.bak` 备份）
+   - 一致则跳过，不修改
+   - 修正 `inclusion: auto` → `inclusion: always`
 
-### 步骤 1：备份现有文件
-
-```bash
-cp ~/.kiro/steering/installed-tools-summary.md ~/.kiro/steering/installed-tools-summary.md.bak
-cp ~/.kiro/steering/installed-skills-summary.md ~/.kiro/steering/installed-skills-summary.md.bak
-```
-
-### 步骤 2：修正 Steering 文件的 inclusion 模式
-
-```bash
-# 修改所有 steering 文件
-sed -i '' 's/inclusion: auto/inclusion: always/g' ~/.kiro/steering/*.md
-```
-
-### 步骤 3：创建 skills-index Power
-
-```bash
-# 创建目录
-mkdir -p ~/.kiro/powers/installed/skills-index/steering
-
-# 移动技能索引
-mv ~/.kiro/steering/installed-skills-summary.md ~/.kiro/powers/installed/skills-index/steering/skill.md
-
-# 修改 frontmatter
-# 手动编辑文件，将 frontmatter 改为：
-# ---
-# name: "skills-index"
-# description: "Comprehensive index of all installed skills..."
-# keywords: ["skills", "index", "references", "templates"]
-# ---
-```
-
-### 步骤 4：重命名工具偏好设置
-
-```bash
-# 重命名文件
-mv ~/.kiro/steering/installed-tools-summary.md ~/.kiro/steering/tool-preferences.md
-
-# 修改 frontmatter
-# 手动编辑文件，将 frontmatter 改为：
-# ---
-# description: "Tool usage preferences for the project..."
-# inclusion: always
-# ---
-```
-
-### 步骤 5：创建 POWER.md
-
-创建 `~/.kiro/powers/installed/skills-index/POWER.md`：
-
-```yaml
----
-name: "skills-index"
-displayName: "Skills Index"
-description: "Index of all installed skills with their references and templates"
-keywords: ["skills", "index", "references", "templates"]
----
-
-# Skills Index
-
-This power provides a comprehensive index of all installed skills.
-```
-
-### 步骤 6：注册 Power
-
-编辑 `~/.kiro/powers/registry.json`，添加：
-
-```json
-{
-  "powers": {
-    "skills-index": {
-      "name": "skills-index",
-      "description": "Index of all installed skills",
-      "installed": true,
-      "source": {"type": "local"}
-    }
-  }
-}
-```
-
-编辑 `~/.kiro/powers/installed.json`，添加：
-
-```json
-{
-  "installedPowers": [
-    {"name": "skills-index", "registryId": "local-skills"}
-  ]
-}
-```
-
-### 步骤 7：重启 Kiro
-
-重启 Kiro IDE 以加载新配置。
+2. **清理多余 Powers**
+   - 扫描源目录，构建期望的 powers 列表
+   - 对比已安装的 powers
+   - 自动删除不在源目录中的 powers
+   - 同时清理校验和记录
 
 ## 验证迁移
 
@@ -125,14 +42,15 @@ This power provides a comprehensive index of all installed skills.
 ls ~/.kiro/steering/
 # 应该看到：
 # - tool-preferences.md
-# - ripgrep-tool-preferences.md
-# - sharkdp-fd-tool-preferences.md
+# - product.md, tech.md, structure.md, powers.md（模板）
 
 # Powers 目录
-ls ~/.kiro/powers/installed/skills-index/
-# 应该看到：
-# - POWER.md
-# - steering/skill.md
+ls ~/.kiro/powers/installed/
+# 应该看到你的技能，如：
+# - ripgrep
+# - sharkdp-fd
+# - rust-skills-*
+# - 等等
 ```
 
 ### 检查 Frontmatter
@@ -145,79 +63,66 @@ head -5 ~/.kiro/steering/tool-preferences.md
 # description: "..."
 # inclusion: always
 # ---
-
-# 检查 Skill 文件
-head -5 ~/.kiro/powers/installed/skills-index/steering/skill.md
-# 应该看到：
-# ---
-# name: "skills-index"
-# description: "..."
-# keywords: [...]
-# ---
-```
-
-### 在 Kiro 中测试
-
-打开 Kiro，尝试：
-
-```
-"What skills are available?"
-"Show me the skills index"
-```
-
-Kiro 应该能够找到并使用 skills-index Power。
-
-## 回滚
-
-如果迁移出现问题，可以回滚：
-
-```bash
-# 恢复备份
-cp ~/.kiro/steering/installed-tools-summary.md.bak ~/.kiro/steering/installed-tools-summary.md
-cp ~/.kiro/steering/installed-skills-summary.md.bak ~/.kiro/steering/installed-skills-summary.md
-
-# 删除新文件
-rm -rf ~/.kiro/powers/installed/skills-index/
-rm ~/.kiro/steering/tool-preferences.md
-
-# 重启 Kiro
 ```
 
 ## 常见问题
 
-### Q: 为什么要迁移？
+### Q: --fix 会覆盖我的自定义内容吗？
 
-A: 旧版本不符合 Kiro 官方规范：
-- 混淆了 Steering（项目约定）和 Skills（大型文档集）的概念
-- 使用了无效的 `inclusion: auto` 模式
-- 文件放置位置不当
+A: 不会。`--fix` 会对比文件内容：
+- 如果内容一致，跳过
+- 如果内容不同，重新生成并创建 `.bak` 备份
+- 你可以从备份文件中恢复自定义内容
 
-### Q: 迁移会影响现有功能吗？
+### Q: 我需要运行 --fix 吗？
 
-A: 不会。迁移只是重新组织文件，功能保持不变。实际上，迁移后性能会更好，因为技能索引会按需加载。
+A: 建议在以下情况下运行：
+- 从旧版本升级
+- 怀疑配置文件被修改
+- 想验证配置是否正确
+- 发现有多余的 powers
 
-### Q: 必须迁移吗？
+### Q: --fix 是否安全？
 
-A: 强烈建议迁移。虽然旧版本可能仍然工作，但不符合官方规范，可能在未来的 Kiro 版本中出现问题。
+A: 是的，`--fix` 是安全的：
+- 会创建备份文件（`.bak`）
+- 只删除不在源目录中的 powers
+- 不会影响源文件
 
-### Q: 迁移需要多长时间？
+### Q: 如何回滚？
 
-A: 使用自动修复脚本，整个过程不到 1 分钟。
+A: 如果需要回滚：
 
-### Q: 迁移后需要重新安装技能吗？
+```bash
+# 恢复 Steering 文件
+cp ~/.kiro/steering/product.md.bak ~/.kiro/steering/product.md
 
-A: 不需要。迁移只是重新组织现有文件，不影响已安装的技能。
+# 重新安装 powers（如果误删）
+./kiro-adapter.sh --force
+```
+
+## 命令对照表
+
+| 功能 | 命令 |
+|------|------|
+| 正常安装 | `./kiro-adapter.sh` |
+| 修复配置 | `./kiro-adapter.sh --fix` |
+| 强制重装 | `./kiro-adapter.sh --force` |
+| 详细输出 | `./kiro-adapter.sh --verbose` |
+| 查看帮助 | `./kiro-adapter.sh --help` |
 
 ## 获取帮助
 
 如果迁移过程中遇到问题：
 
-1. 查看 [UPDATE-NOTES.md](./UPDATE-NOTES.md)
-2. 查看 [docs/STEERING-SKILLS-ANALYSIS.md](./docs/STEERING-SKILLS-ANALYSIS.md)
-3. 提交 Issue
+1. 查看 [README.md](./README.md)
+2. 查看 [QUICKSTART.md](./QUICKSTART.md)
+3. 查看 [CHANGELOG.md](./CHANGELOG.md)
+4. 提交 Issue
 
 ## 相关文档
 
-- [UPDATE-NOTES.md](./UPDATE-NOTES.md) - 详细的更新说明
+- [README.md](./README.md) - 完整文档
 - [QUICKSTART.md](./QUICKSTART.md) - 快速开始指南
-- [docs/STEERING-SKILLS-ANALYSIS.md](./docs/STEERING-SKILLS-ANALYSIS.md) - 官方规范分析
+- [CHANGELOG.md](./CHANGELOG.md) - 更新日志
+- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) - 项目结构

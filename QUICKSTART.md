@@ -59,7 +59,6 @@ ls ~/.kiro/powers/installed/
 ```
 
 应该看到：
-- `skills-index/` - 技能索引
 - `ripgrep/` - 如果安装了 ripgrep
 - `sharkdp-fd/` - 如果安装了 fd
 - 其他已安装的技能
@@ -72,41 +71,23 @@ ls ~/.kiro/steering/
 
 **首次运行后**，应该看到：
 - `tool-preferences.md` - 统一的工具偏好设置（包含所有工具配置）
-- `product.md`, `tech.md`, `structure.md` - 自动创建的标准模板
+- `product.md`, `tech.md`, `structure.md`, `powers.md` - 自动创建的标准模板
 
 > 💡 **注意**：Steering 模板会在首次运行时自动创建，你可以直接编辑它们来自定义项目配置。
-
-### 检查 Skills Index
-
-```bash
-ls ~/.kiro/powers/installed/skills-index/
-```
-
-应该看到：
-- `POWER.md` - Power 定义
-- `steering/skill.md` - 完整的技能索引
-
-### 查看技能索引内容
-
-```bash
-cat ~/.kiro/powers/installed/skills-index/steering/skill.md | head -30
-```
-
-应该看到所有已安装技能的列表，包括它们的 references 和 templates。
 
 ### 在 Kiro 中测试
 
 打开 Kiro，尝试：
 
 ```
-"What skills are available?"
+"Use rg to search for 'function' in this project"
 ```
-Kiro 应该能够找到 skills-index Power 并列出所有技能。
+Kiro 会优先使用 `rg` 命令而不是内置的 `grepSearch`。
 
 ```
-"Show me skills with references"
+"Use fd to find all .md files"
 ```
-Kiro 会显示哪些技能包含参考文档。
+Kiro 会优先使用 `fd` 命令而不是内置的 `fileSearch`。
 
 ```
 "Use rg to search for 'function' in this project"
@@ -132,6 +113,7 @@ Steering 模板会在首次运行时自动创建：
 - `product.md` - 产品概述
 - `tech.md` - 技术栈
 - `structure.md` - 项目结构
+- `powers.md` - Powers 系统介绍
 
 ### 常用文件（可选，手动创建）
 - `api-standards.md` - API 规范
@@ -144,9 +126,9 @@ Steering 模板会在首次运行时自动创建：
 
 ## 下一步
 
-- 阅读 [完整文档](./docs/INSTALL-GUIDE-ZH.md)
+- 阅读 [完整文档](./README.md)
 - 了解 [项目结构](./PROJECT-STRUCTURE.md)
-- 查看 [Steering 和 Skills 分析](./docs/STEERING-SKILLS-ANALYSIS.md)
+- 查看 [更新日志](./CHANGELOG.md)
 
 ## 常见问题
 

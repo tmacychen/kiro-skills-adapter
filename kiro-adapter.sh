@@ -76,113 +76,24 @@ mkdir -p "$POWERS_DIR" "$INSTALLED_DIR"
 # Function to fix old configuration
 fix_old_configuration() {
     local steering_dir="$HOME/.kiro/steering"
+    local template_dir="$(dirname "$0")/templates/steering"
     local fixed_count=0
     local regenerated_count=0
     
     echo -e "${BLUE}Fixing old configuration...${NC}"
     
-    # Function to generate template content
-    generate_template_content() {
-        local template_type="$1"
-        case "$template_type" in
-            "product")
-                cat <<'EOF'
----
-description: "Product overview - purpose, target users, key features, and business goals"
-inclusion: always
----
-
-# Product Overview
-
-## Purpose
-
-[Describe what your product does and why it exists]
-
-## Target Users
-
-[Who is this product for?]
-
-## Key Features
-
-[List the main features and capabilities]
-
-## Business Goals
-
-[What are the business objectives?]
-
-## Technical Constraints
-
-[Any important technical limitations or requirements]
-EOF
-                ;;
-            "tech")
-                cat <<'EOF'
----
-description: "Tech stack - frameworks, libraries, development tools, and technical constraints"
-inclusion: always
----
-
-# Tech Stack
-
-## Frameworks
-
-[List main frameworks used]
-
-## Libraries
-
-[Key libraries and dependencies]
-
-## Development Tools
-
-[Tools used for development]
-
-## Technical Constraints
-
-[Any technical limitations or requirements]
-
-## Preferred Patterns
-
-[Coding patterns and architectural decisions]
-EOF
-                ;;
-            "structure")
-                cat <<'EOF'
----
-description: "Project structure - file organization, naming conventions, import patterns, and architectural decisions"
-inclusion: always
----
-
-# Project Structure
-
-## File Organization
-
-[Describe how files are organized]
-
-## Naming Conventions
-
-[File and directory naming rules]
-
-## Import Patterns
-
-[How imports should be structured]
-
-## Architectural Decisions
-
-[Key architectural choices and patterns]
-
-## Module Structure
-
-[How modules are organized]
-EOF
-                ;;
-        esac
-    }
+    # Check if template directory exists
+    if [ ! -d "$template_dir" ]; then
+        echo -e "${YELLOW}⚠ Template directory not found: $template_dir${NC}"
+        echo -e "${YELLOW}  Cannot fix configuration without templates${NC}"
+        return 1
+    fi
     
     # Check if file is expected
     is_expected_file() {
         local filename="$1"
         case "$filename" in
-            "product.md"|"tech.md"|"structure.md"|"tool-preferences.md")
+            "product.md"|"tech.md"|"structure.md"|"powers.md"|"tool-preferences.md")
                 return 0
                 ;;
             *)
@@ -192,19 +103,24 @@ EOF
     }
     
     # Check and fix expected files
-    for filename in "product.md" "tech.md" "structure.md"; do
+    for template_file in "$template_dir"/*.md; do
+        [ -f "$template_file" ] || continue
+        
+        local filename=$(basename "$template_file")
         local filepath="$steering_dir/$filename"
-        local template_type="${filename%.md}"
+        
+        # Skip tool-preferences.md as it's auto-generated
+        [ "$filename" = "tool-preferences.md" ] && continue
         
         if [ -f "$filepath" ]; then
             # File exists, compare content
-            local expected_content=$(generate_template_content "$template_type")
+            local expected_content=$(cat "$template_file")
             local actual_content=$(cat "$filepath")
             
             if [ "$expected_content" != "$actual_content" ]; then
                 # Content differs, backup and regenerate
                 cp "$filepath" "$filepath.bak"
-                echo "$expected_content" > "$filepath"
+                cp "$template_file" "$filepath"
                 echo -e "  ${YELLOW}⟳${NC} Regenerated $filename (backup: $filename.bak)"
                 ((regenerated_count++))
             else
@@ -213,8 +129,7 @@ EOF
         else
             # File doesn't exist, create it
             mkdir -p "$steering_dir"
-            local content=$(generate_template_content "$template_type")
-            echo "$content" > "$filepath"
+            cp "$template_file" "$filepath"
             echo -e "  ${GREEN}✓${NC} Created $filename"
             ((fixed_count++))
         fi
@@ -279,6 +194,8 @@ EOF
 # Function to initialize steering template files (always run, skip existing)
 initialize_steering_templates() {
     local steering_dir="$HOME/.kiro/steering"
+    local template_dir="$(dirname "$0")/templates/steering"
+    
     mkdir -p "$steering_dir"
     
     local created_count=0
@@ -286,113 +203,28 @@ initialize_steering_templates() {
     
     [ "$VERBOSE" = true ] && echo -e "${BLUE}Initializing steering templates...${NC}"
     
-    # Create product.md if it doesn't exist
-    if [ ! -f "$steering_dir/product.md" ]; then
-        cat > "$steering_dir/product.md" <<'EOF'
----
-description: "Product overview - purpose, target users, key features, and business goals"
-inclusion: always
----
-
-# Product Overview
-
-## Purpose
-
-[Describe what your product does and why it exists]
-
-## Target Users
-
-[Who is this product for?]
-
-## Key Features
-
-[List the main features and capabilities]
-
-## Business Goals
-
-[What are the business objectives?]
-
-## Technical Constraints
-
-[Any important technical limitations or requirements]
-EOF
-        [ "$VERBOSE" = true ] && echo -e "  ${GREEN}✓${NC} Created product.md"
-        ((created_count++))
-    else
-        ((skipped_count++))
+    # Check if template directory exists
+    if [ ! -d "$template_dir" ]; then
+        echo -e "${YELLOW}⚠ Template directory not found: $template_dir${NC}"
+        echo -e "${YELLOW}  Skipping steering template initialization${NC}"
+        return 1
     fi
     
-    # Create tech.md if it doesn't exist
-    if [ ! -f "$steering_dir/tech.md" ]; then
-        cat > "$steering_dir/tech.md" <<'EOF'
----
-description: "Tech stack - frameworks, libraries, development tools, and technical constraints"
-inclusion: always
----
-
-# Tech Stack
-
-## Frameworks
-
-[List main frameworks used]
-
-## Libraries
-
-[Key libraries and dependencies]
-
-## Development Tools
-
-[Tools used for development]
-
-## Technical Constraints
-
-[Any technical limitations or requirements]
-
-## Preferred Patterns
-
-[Coding patterns and architectural decisions]
-EOF
-        [ "$VERBOSE" = true ] && echo -e "  ${GREEN}✓${NC} Created tech.md"
-        ((created_count++))
-    else
-        ((skipped_count++))
-    fi
-    
-    # Create structure.md if it doesn't exist
-    if [ ! -f "$steering_dir/structure.md" ]; then
-        cat > "$steering_dir/structure.md" <<'EOF'
----
-description: "Project structure - file organization, naming conventions, import patterns, and architectural decisions"
-inclusion: always
----
-
-# Project Structure
-
-## File Organization
-
-[Describe how files are organized]
-
-## Naming Conventions
-
-[File and directory naming rules]
-
-## Import Patterns
-
-[How imports should be structured]
-
-## Architectural Decisions
-
-[Key architectural choices and patterns]
-
-## Module Structure
-
-[How modules are organized]
-EOF
-        [ "$VERBOSE" = true ] && echo -e "  ${GREEN}✓${NC} Created structure.md"
-        ((created_count++))
-    else
-        ((skipped_count++))
-    fi
+    # Copy template files if they don't exist
+    for template_file in "$template_dir"/*.md; do
+        [ -f "$template_file" ] || continue
+        
+        local filename=$(basename "$template_file")
+        local target_file="$steering_dir/$filename"
+        
+        if [ ! -f "$target_file" ]; then
+            cp "$template_file" "$target_file"
+            [ "$VERBOSE" = true ] && echo -e "  ${GREEN}✓${NC} Created $filename"
+            ((created_count++))
+        else
+            ((skipped_count++))
+        fi
+    done
     
     if [ $created_count -gt 0 ]; then
         echo -e "${GREEN}Created $created_count steering templates${NC}"
@@ -429,6 +261,7 @@ fi
 installed=0
 updated=0
 skipped=0
+installed_powers=()  # 记录本次安装的所有 powers
 
 # Calculate checksum for a skill directory
 # Returns MD5 hash of SKILL.md and tool-preferences.md (if exists)
@@ -767,6 +600,9 @@ process_skill() {
     # Calculate checksum
     local checksum=$(calculate_skill_checksum "$skill_dir")
     
+    # Always record this power (regardless of whether it needs update)
+    installed_powers+=("$skill_name")
+    
     # Check if update is needed
     if ! needs_update "$skill_name" "$checksum"; then
         echo -e "${GRAY}$skill_name${NC} ${GREEN}✓${NC} Up to date"
@@ -853,6 +689,8 @@ EOF
     # Update checksum
     update_checksum "$skill_name" "$checksum"
     
+    # Note: installed_powers already recorded at the beginning of function
+    
     if [ "$is_new" = true ]; then
         ((installed++))
     else
@@ -867,14 +705,9 @@ for skill_dir in "$SKILLS_SRC"/*; do
     [ -d "$skill_dir" ] || continue
     name=$(basename "$skill_dir")
     
-    # Skip adapter and non-skill files
-    [[ "$name" == "kiro-adapter.sh" ]] && continue
-    [[ "$name" == "power-promot.txt" ]] && continue
-    [[ "$name" == "dogfood" ]] && continue  # Skip dogfood directory
-    
     # Case 1: Single SKILL.md at root
     if [ -f "$skill_dir/SKILL.md" ]; then
-        process_skill "$skill_dir" "$name" && ((installed++))
+        process_skill "$skill_dir" "$name"
         continue
     fi
     
@@ -891,7 +724,7 @@ for skill_dir in "$SKILLS_SRC"/*; do
             # Generate power name with parent prefix: parent-child
             power_name="${name}-${subskill_name}"
             
-            process_skill "$subskill" "$power_name" && ((installed++))
+            process_skill "$subskill" "$power_name"
         done
     fi
 done
@@ -901,57 +734,66 @@ echo -e "${GREEN}New: $installed | Updated: $updated | Skipped: $skipped${NC}"
 echo -e "${BLUE}Total processed: $((installed + updated + skipped))${NC}"
 echo
 
-# Generate global tool preferences and skills index
-echo -e "${BLUE}Generating tool preferences and skills index...${NC}"
+# Clean up orphaned powers (only in --fix mode)
+if [ "$FIX_MODE" = true ]; then
+    echo -e "${BLUE}Cleaning up orphaned powers...${NC}"
+    
+    # Show what powers should exist (from current project source)
+    echo -e "${BLUE}Powers from current project source (${#installed_powers[@]} total):${NC}"
+    for power in "${installed_powers[@]}"; do
+        echo -e "  ${GREEN}✓${NC} $power"
+    done
+    echo
+    
+    orphaned_count=0
+    
+    # Check all installed powers in target directory
+    # Compare with powers that should exist (from current project source)
+    echo -e "${BLUE}Checking target directory: $INSTALLED_DIR${NC}"
+    for power_dir in "$INSTALLED_DIR"/*; do
+        [ -d "$power_dir" ] || continue
+        power_name=$(basename "$power_dir")
+        
+        # Check if this power exists in current project source
+        is_in_source=false
+        for installed in "${installed_powers[@]}"; do
+            if [ "$installed" = "$power_name" ]; then
+                is_in_source=true
+                break
+            fi
+        done
+        
+        # If not in source, it's orphaned - remove it
+        if [ "$is_in_source" = false ]; then
+            echo -e "  ${YELLOW}⚠${NC} $power_name (not in current source, removing...)"
+            rm -rf "$power_dir"
+            
+            # Remove from checksum file
+            grep -v "^$power_name:" "$CHECKSUM_FILE" > "$CHECKSUM_FILE.tmp" 2>/dev/null || true
+            mv "$CHECKSUM_FILE.tmp" "$CHECKSUM_FILE"
+            
+            ((orphaned_count++))
+        else
+            echo -e "  ${GREEN}✓${NC} $power_name (in source, keeping)"
+        fi
+    done
+    
+    echo
+    if [ $orphaned_count -eq 0 ]; then
+        echo -e "${GREEN}✓ No orphaned powers found${NC}"
+    else
+        echo -e "${YELLOW}Removed $orphaned_count orphaned powers${NC}"
+    fi
+    echo
+fi
+
+# Generate global tool preferences
+echo -e "${BLUE}Generating tool preferences...${NC}"
 global_steering_dir="$HOME/.kiro/steering"
 mkdir -p "$global_steering_dir"
 tool_preferences="$global_steering_dir/tool-preferences.md"
 
-# Create skills-index power
-skills_index_dir="$INSTALLED_DIR/skills-index"
-mkdir -p "$skills_index_dir/steering"
-
-# Generate POWER.md for skills-index
-cat > "$skills_index_dir/POWER.md" <<'EOF'
----
-name: "skills-index"
-displayName: "Skills Index"
-description: "Index of all installed skills with their references and templates. Use when discovering available skills, finding reference documentation, or locating template files."
-keywords: ["skills", "index", "references", "templates", "documentation", "discover", "what skills", "available skills"]
----
-
-# Skills Index
-
-This power provides a comprehensive index of all installed skills and their resources.
-
-## Overview
-
-The Skills Index helps you discover and utilize all available skills in your Kiro environment.
-
-## Usage
-
-Ask Kiro about:
-- "What skills are available?"
-- "Show me skills with references"
-- "Which skills have templates?"
-- "Find documentation for [skill-name]"
-- "List all Rust skills"
-- "What agent-browser references exist?"
-
-## Features
-
-- Complete list of installed skills
-- Reference documentation index
-- Template file locations
-- Resource discovery
-- Skill categorization
-
-## Source
-
-This index is automatically generated by kiro-adapter.sh and updated whenever skills are installed or modified.
-EOF
-
-# Generate tool preferences summary (in steering)
+# Generate tool-preferences.md
 cat > "$tool_preferences" <<'HEADER'
 ---
 description: "Tool usage preferences for the project - defines which tools to prefer for common operations"
@@ -1051,7 +893,6 @@ To update tool preferences:
 
 ## See Also
 
-- Skills index: \`~/.kiro/powers/installed/skills-index/steering/skill.md\`
 - Individual skill documentation: \`~/.kiro/powers/installed/*/steering/skill.md\`
 - [Kiro Documentation](https://kiro.ai/docs)
 
@@ -1064,251 +905,6 @@ if [ $tool_count -gt 0 ]; then
     echo -e "  ${GREEN}✓${NC} Generated tool preferences with $tool_count tools"
 else
     echo -e "  ${YELLOW}⚠${NC} No tool preferences found"
-fi
-
-# Generate skills index (in skills-index power)
-cat > "$skills_index_dir/steering/skill.md" <<'HEADER'
----
-name: "skills-index"
-description: "Comprehensive index of all installed skills with their references and templates. Use when you need to discover available skills, find reference documentation, or locate template files."
-keywords: ["skills", "index", "references", "templates", "documentation", "discover"]
----
-
-# Installed Skills Index
-
-This file is automatically generated by kiro-adapter.sh.
-Last updated: TIMESTAMP
-
-## Overview
-
-This document provides a comprehensive index of all installed skills, including their references and templates.
-
-## Installed Skills
-
-HEADER
-
-# Replace timestamp
-sed -i '' "s/TIMESTAMP/$(date '+%Y-%m-%d %H:%M:%S')/" "$skills_index_dir/steering/skill.md"
-
-# Collect skill information
-skill_count=0
-for power_dir in "$INSTALLED_DIR"/*; do
-    [ -d "$power_dir" ] || continue
-    skill_name=$(basename "$power_dir")
-    steering_dir="$power_dir/steering"
-    skill_file="$steering_dir/skill.md"
-    
-    [ -f "$skill_file" ] || continue
-    
-    ((skill_count++))
-    
-    # Extract description from SKILL.md frontmatter
-    desc=$(sed -n '2,/^---$/p' "$skill_file" 2>/dev/null | grep "^description:" | sed 's/description: *//' | tr -d '"')
-    [ -z "$desc" ] && desc="No description available"
-    
-    # Check for references and templates in the original skill directory
-    # Find the original skill directory by searching in SKILLS_SRC
-    original_skill_dir=""
-    for src_dir in "$SKILLS_SRC"/*; do
-        [ -d "$src_dir" ] || continue
-        src_name=$(basename "$src_dir")
-        
-        # Check direct match
-        if [ -f "$src_dir/SKILL.md" ] && [ "$src_name" = "$skill_name" ]; then
-            original_skill_dir="$src_dir"
-            break
-        fi
-        
-        # Check nested skills
-        if [ -d "$src_dir/skills" ]; then
-            for subskill in "$src_dir/skills"/*; do
-                [ -d "$subskill" ] || continue
-                subskill_name=$(basename "$subskill")
-                power_name="${src_name}-${subskill_name}"
-                if [ "$power_name" = "$skill_name" ]; then
-                    original_skill_dir="$subskill"
-                    break 2
-                fi
-            done
-        fi
-    done
-    
-    # Count references and templates
-    ref_count=0
-    template_count=0
-    has_resources=false
-    
-    if [ -n "$original_skill_dir" ]; then
-        if [ -d "$original_skill_dir/references" ]; then
-            ref_count=$(find "$original_skill_dir/references" -type f -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-            [ $ref_count -gt 0 ] && has_resources=true
-        fi
-        
-        if [ -d "$original_skill_dir/templates" ]; then
-            template_count=$(find "$original_skill_dir/templates" -type f 2>/dev/null | wc -l | tr -d ' ')
-            [ $template_count -gt 0 ] && has_resources=true
-        fi
-    fi
-    
-    # Write skill entry
-    cat >> "$skills_index_dir/steering/skill.md" <<EOF
-
-### $skill_count. $skill_name
-
-- **Description**: $desc
-- **Skill File**: \`~/.kiro/powers/installed/$skill_name/steering/skill.md\`
-EOF
-    
-    if [ $ref_count -gt 0 ]; then
-        cat >> "$skills_index_dir/steering/skill.md" <<EOF
-- **References**: $ref_count files in \`$original_skill_dir/references/\`
-EOF
-    fi
-    
-    if [ $template_count -gt 0 ]; then
-        cat >> "$skills_index_dir/steering/skill.md" <<EOF
-- **Templates**: $template_count files in \`$original_skill_dir/templates/\`
-EOF
-    fi
-    
-    # List reference files if they exist
-    if [ $ref_count -gt 0 ]; then
-        cat >> "$skills_index_dir/steering/skill.md" <<EOF
-
-  **Reference Files:**
-EOF
-        find "$original_skill_dir/references" -type f -name "*.md" 2>/dev/null | while read ref_file; do
-            ref_name=$(basename "$ref_file")
-            cat >> "$skills_index_dir/steering/skill.md" <<EOF
-  - \`$ref_name\`
-EOF
-        done
-    fi
-    
-    # List template files if they exist
-    if [ $template_count -gt 0 ]; then
-        cat >> "$skills_index_dir/steering/skill.md" <<EOF
-
-  **Template Files:**
-EOF
-        find "$original_skill_dir/templates" -type f 2>/dev/null | while read tmpl_file; do
-            tmpl_name=$(basename "$tmpl_file")
-            cat >> "$skills_index_dir/steering/skill.md" <<EOF
-  - \`$tmpl_name\`
-EOF
-        done
-    fi
-    
-    echo >> "$skills_index_dir/steering/skill.md"
-done
-
-# Add usage section to skills index
-cat >> "$skills_index_dir/steering/skill.md" <<'FOOTER'
-
-## Usage Guidelines
-
-### Accessing Skill Resources
-
-All skills are available through Kiro's power system:
-
-1. **Skill Documentation**: Located in `~/.kiro/powers/installed/*/steering/skill.md`
-2. **Reference Files**: Available in the original skill directories
-3. **Template Files**: Can be copied from the original skill directories
-
-### Using References
-
-When a skill includes reference files, you can:
-
-```bash
-# View available references for a skill
-ls ~/.kiro/skills/skill-name/references/
-
-# Read a specific reference
-cat ~/.kiro/skills/skill-name/references/reference-name.md
-```
-
-### Using Templates
-
-When a skill includes templates, you can:
-
-```bash
-# List available templates
-ls ~/.kiro/skills/skill-name/templates/
-
-# Copy a template to your project
-cp ~/.kiro/skills/skill-name/templates/template-name.md ./
-```
-
-## Skill Categories
-
-Skills are organized by their functionality:
-
-- **Tool Skills**: Provide command-line tool integrations (ripgrep, fd, etc.)
-- **Domain Skills**: Provide domain-specific knowledge (rust-skills-*, etc.)
-- **Utility Skills**: Provide utility functions (agent-browser, dogfood, etc.)
-
-## Updating Skills
-
-To update skills and regenerate this summary:
-
-```bash
-# Run the adapter script
-./kiro-adapter.sh
-
-# Force reinstall all skills
-./kiro-adapter.sh --force
-```
-
-## See Also
-
-- Tool preferences: `~/.kiro/steering/tool-preferences.md`
-- Individual skill files: `~/.kiro/powers/installed/*/steering/skill.md`
-- [Kiro Powers Documentation](https://kiro.ai/docs/powers)
-
----
-
-*This file is automatically regenerated each time kiro-adapter.sh runs.*
-FOOTER
-
-echo -e "  ${GREEN}✓${NC} Generated skills index with $skill_count skills"
-
-# Register skills-index in registry
-if [ -f "$REGISTRY_JSON" ]; then
-    tmp=$(mktemp)
-    jq --arg n "skills-index" \
-       --arg d "Index of all installed skills with their references and templates" \
-       '.powers[$n] = {
-           "name": $n,
-           "description": $d,
-           "author": "System",
-           "license": "MIT",
-           "keywords": ["skills", "index", "references", "templates"],
-           "displayName": "Skills Index",
-           "iconUrl": "",
-           "repositoryUrl": "",
-           "repositoryCloneUrl": "",
-           "pathInRepo": "",
-           "repositoryBranch": "main",
-           "installed": true,
-           "source": {"type": "local"}
-       }' "$REGISTRY_JSON" > "$tmp" && mv "$tmp" "$REGISTRY_JSON"
-fi
-
-# Update installed.json
-if [ -f "$INSTALLED_JSON" ]; then
-    if ! grep -q "skills-index" "$INSTALLED_JSON"; then
-        tmp=$(mktemp)
-        jq '.installedPowers += [{"name": "skills-index", "registryId": "local-skills"}]' \
-           "$INSTALLED_JSON" > "$tmp" && mv "$tmp" "$INSTALLED_JSON" || true
-    fi
-else
-    cat > "$INSTALLED_JSON" <<EOF
-{
-  "version": "1.0.0",
-  "installedPowers": [{"name": "skills-index", "registryId": "local-skills"}],
-  "dismissedAutoInstalls": []
-}
-EOF
 fi
 
 # Update default agent to include all installed powers

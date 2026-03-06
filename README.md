@@ -10,9 +10,9 @@
 - ✅ **增量安装**: 跳过未更改的技能，节省时间
 - ✅ **校验和追踪**: 使用 MD5 校验和追踪文件变化
 - ✅ **工具偏好设置**: 自动生成和管理工具偏好配置
-- ✅ **技能索引**: 创建完整的技能资源索引
-- ✅ **符合规范**: 遵循 Kiro 官方 Steering 和 Skills 标准
+- ✅ **符合规范**: 遵循 Kiro 官方 Steering 标准
 - ✅ **Submodule 支持**: 支持 Git submodule 形式的技能仓库
+- ✅ **自动清理**: --fix 模式下自动清理多余的 powers
 
 ## 快速开始
 
@@ -25,7 +25,6 @@ cd kiro-skills-adapter
 
 # 赋予执行权限
 chmod +x kiro-adapter.sh
-chmod +x fix-steering-skills.sh
 ```
 
 ### 基本使用
@@ -46,6 +45,29 @@ chmod +x fix-steering-skills.sh
 # 查看帮助
 ./kiro-adapter.sh --help
 ```
+
+## 项目结构
+
+```
+kiro-skills-adapter/
+├── kiro-adapter.sh           # 主脚本
+├── templates/                # 模板文件目录
+│   ├── README.md            # 模板说明文档
+│   └── steering/            # Steering 模板
+│       ├── product.md       # 产品概述模板
+│       ├── tech.md          # 技术栈模板
+│       ├── structure.md     # 项目结构模板
+│       └── powers.md        # Powers 系统介绍
+├── README.md                # 本文档
+├── QUICKSTART.md            # 快速开始指南
+└── docs/                    # 详细文档
+```
+
+**模板系统**:
+- 所有 Steering 模板存储在 `templates/steering/` 目录
+- 脚本运行时自动复制到 `~/.kiro/steering/`
+- 不会覆盖已存在的文件
+- 可以自定义模板以匹配项目需求
 
 ## 工作原理
 
@@ -94,10 +116,6 @@ chmod +x fix-steering-skills.sh
 │   └── structure.md               # 项目结构（模板，可选）
 └── powers/
     └── installed/
-        ├── skills-index/          # 技能索引（自动生成）
-        │   ├── POWER.md
-        │   └── steering/
-        │       └── skill.md
         ├── ripgrep/
         │   ├── POWER.md
         │   └── steering/
@@ -132,15 +150,7 @@ chmod +x fix-steering-skills.sh
 - 从 SKILL.md 的 `replaces` 字段自动生成
 - 生成统一的工具偏好汇总到 `~/.kiro/steering/tool-preferences.md`
 
-### 4. 技能索引
-
-创建完整的技能资源索引：
-
-- 列出所有已安装的技能
-- 显示每个技能的 references 和 templates
-- 作为 Power/Skill 存在，按需加载
-
-### 5. 修复旧配置
+### 4. 修复旧配置
 
 使用 `--fix` 选项修复和验证配置：
 
@@ -148,11 +158,36 @@ chmod +x fix-steering-skills.sh
 - 一致则跳过，不修改
 - 检测额外的文档并提示删除
 - 修正 `inclusion: auto` → `inclusion: always`
+- **自动清理多余的 powers**
 
-### 6. 符合 Kiro 规范
+#### 清理多余 Powers
+
+`--fix` 功能会自动检测并清理不再对应当前源目录结构的 powers：
+
+```bash
+$ ./kiro-adapter.sh --fix
+
+Checking for orphaned powers...
+  ⚠ Orphaned power detected: agent-browser
+     Removing...
+  ⚠ Orphaned power detected: dogfood
+     Removing...
+Removed 2 orphaned powers
+```
+
+**清理场景**：
+- 旧版本遗留的 powers
+- 修改目录结构后的多余 powers
+- 手动删除源文件后的残留 powers
+
+**安全机制**：
+- 完全通用：基于文件结构判断，无硬编码规则
+- 只删除不在源目录中的 powers
+- 同时清理校验和记录
+
+### 5. 符合 Kiro 规范
 
 - **Steering**: 用于项目约定（工具偏好、API 规范等）
-- **Skills**: 用于大型文档集（技能索引、参考文档）
 - 使用正确的 `inclusion` 模式（`always`, `fileMatch`, `manual`）
 
 ## SKILL.md 格式
@@ -366,6 +401,25 @@ sudo yum install jq
 
 ## 更新日志
 
+### v3.2.0 - 自动清理多余 Powers
+
+- ✨ **自动清理多余 powers**: `--fix` 模式下自动检测并清理
+- ✨ **智能识别**: 基于源目录结构构建期望列表
+- ✨ **安全机制**: 白名单保护，只删除多余项
+- ✨ **清晰反馈**: 显示清理进度和统计
+- 🔧 增强 `--fix` 功能：不仅修复配置，还清理多余 powers
+- 📝 新增 `FIX-FEATURE-UPDATE.md` 文档
+
+### v3.1.0 - 模板外部化
+
+- ✨ **模板外部化**：将所有 Steering 模板移到 `templates/steering/` 目录
+- ✨ **改进可维护性**：不再在脚本中嵌入大量文本
+- ✨ **易于自定义**：可以直接编辑模板文件
+- ✨ **新增 powers.md 模板**：介绍 Kiro Powers 系统
+- 📝 添加 `templates/README.md` 说明文档
+- 🔧 优化 `initialize_steering_templates()` 函数
+- 🔧 优化 `fix_old_configuration()` 函数
+
 ### v3.0.0 - 简化和自动化
 
 - ✨ **自动初始化 Steering**：每次运行自动创建缺失的模板
@@ -377,11 +431,9 @@ sudo yum install jq
 
 ### v2.0.0 - 符合 Kiro 规范
 
-- ✨ 修正 Steering 和 Skills 的使用
-- ✨ 将技能索引移到 Powers 系统
+- ✨ 修正 Steering 的使用
 - ✨ 修正 `inclusion` 模式（`auto` → `always`）
 - ✨ 创建标准 Steering 文件模板
-- ✨ 添加修复脚本 `fix-steering-skills.sh`
 
 ### v1.0.0 - 差异更新版本
 
