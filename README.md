@@ -1,91 +1,91 @@
 # Kiro Skills Adapter
 
-将 Skills 从任意目录转换为 Kiro Powers 格式的智能安装工具。
+An intelligent installation tool that converts Skills from any directory to Kiro Powers format.
 
-> 📖 **新手？** 查看 [快速开始指南](./QUICKSTART.md) 5 分钟上手！
+> 📖 **New user?** Check out the [Quick Start Guide](./QUICKSTART-EN.md) to get started in 5 minutes!
 
-## 特性
+## Features
 
-- ✅ **差异更新**: 自动检测文件变化，只更新修改过的技能
-- ✅ **增量安装**: 跳过未更改的技能，节省时间
-- ✅ **校验和追踪**: 使用 MD5 校验和追踪文件变化
-- ✅ **工具偏好设置**: 自动生成和管理工具偏好配置
-- ✅ **符合规范**: 遵循 Kiro 官方 Steering 标准
-- ✅ **Submodule 支持**: 支持 Git submodule 形式的技能仓库
-- ✅ **自动清理**: --fix 模式下自动清理多余的 powers
+- ✅ **Differential Updates**: Automatically detects file changes and only updates modified skills
+- ✅ **Incremental Installation**: Skips unchanged skills to save time
+- ✅ **Checksum Tracking**: Uses MD5 checksums to track file changes
+- ✅ **Tool Preferences**: Automatically generates and manages tool preference configurations
+- ✅ **Standard Compliance**: Follows Kiro official Steering standards
+- ✅ **Submodule Support**: Supports skill repositories in Git submodule format
+- ✅ **Auto Cleanup**: Automatically cleans up excess powers in --fix mode
 
-## 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone <repository-url>
 cd kiro-skills-adapter
 
-# 赋予执行权限
+# Make executable
 chmod +x kiro-adapter.sh
 ```
 
-### 基本使用
+### Basic Usage
 
 ```bash
-# 默认模式：智能差异更新 + 自动初始化 Steering
+# Default mode: Intelligent differential update + automatic Steering initialization
 ./kiro-adapter.sh
 
-# 修复旧版本配置
+# Fix old version configuration
 ./kiro-adapter.sh --fix
 
-# 强制重新安装所有技能
+# Force reinstall all skills
 ./kiro-adapter.sh --force
 
-# 显示详细输出
+# Show detailed output
 ./kiro-adapter.sh --verbose
 
-# 查看帮助
+# View help
 ./kiro-adapter.sh --help
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 kiro-skills-adapter/
-├── kiro-adapter.sh           # 主脚本
-├── templates/                # 模板文件目录
-│   ├── README.md            # 模板说明文档
-│   └── steering/            # Steering 模板
-│       ├── product.md       # 产品概述模板
-│       ├── tech.md          # 技术栈模板
-│       ├── structure.md     # 项目结构模板
-│       └── powers.md        # Powers 系统介绍
-├── README.md                # 本文档
-├── QUICKSTART.md            # 快速开始指南
-└── docs/                    # 详细文档
+├── kiro-adapter.sh           # Main script
+├── templates/                # Template files directory
+│   ├── README.md            # Template documentation
+│   └── steering/            # Steering templates
+│       ├── product.md       # Product overview template
+│       ├── tech.md          # Technology stack template
+│       ├── structure.md     # Project structure template
+│       └── powers.md        # Powers system introduction
+├── README.md                # This documentation
+├── QUICKSTART.md            # Quick start guide
+└── docs/                    # Detailed documentation
 ```
 
-**模板系统**:
-- 所有 Steering 模板存储在 `templates/steering/` 目录
-- 脚本运行时自动复制到 `~/.kiro/steering/`
-- 不会覆盖已存在的文件
-- 可以自定义模板以匹配项目需求
+**Template System**:
+- All Steering templates are stored in `templates/steering/` directory
+- Script automatically copies them to `~/.kiro/steering/`
+- Will not overwrite existing files
+- Templates can be customized to match project requirements
 
-## 工作原理
+## Working Principle
 
-### 输入结构
+### Input Structure
 
-脚本支持三种技能目录结构：
+The script supports three skill directory structures:
 
 ```
-~/.kiro/skills/                    # 或当前目录
-├── ripgrep/                       # 单个技能
-│   ├── SKILL.md                   # 必需
-│   └── tool-preferences.md        # 可选
+~/.kiro/skills/                    # Or current directory
+├── ripgrep/                       # Single skill
+│   ├── SKILL.md                   # Required
+│   └── tool-preferences.md        # Optional
 ├── agent-browser/                 # Git submodule
-│   └── skills/                    # 嵌套 skills 目录
+│   └── skills/                    # Nested skills directory
 │       ├── agent-browser/
 │       │   ├── SKILL.md
-│       │   ├── references/        # 参考文档
-│       │   └── templates/         # 模板文件
+│       │   ├── references/        # Reference documentation
+│       │   └── templates/         # Template files
 │       ├── dogfood/
 │       │   └── SKILL.md
 │       ├── electron/
@@ -93,76 +93,76 @@ kiro-skills-adapter/
 │       └── slack/
 │           └── SKILL.md
 └── rust-skills/                   # Git submodule
-    └── skills/                    # 嵌套结构
+    └── skills/                    # Nested structure
         ├── coding-guidelines/
         │   └── SKILL.md
         └── domain-web/
             └── SKILL.md
 ```
 
-**说明**:
-- **单个技能**: 包含 `SKILL.md` 的目录直接安装
-- **Git submodule**: 如果包含 `skills/` 子目录，会递归处理所有子技能
-- **嵌套结构**: 子技能名称会添加父目录前缀（如 `agent-browser-agent-browser`）
+**Explanation**:
+- **Single Skill**: Directories containing `SKILL.md` are installed directly
+- **Git Submodule**: If contains `skills/` subdirectory, recursively processes all sub-skills
+- **Nested Structure**: Sub-skill names will have parent directory prefix (e.g., `agent-browser-agent-browser`)
 
-### 输出结构
+### Output Structure
 
 ```
 ~/.kiro/
-├── steering/                      # 项目约定和标准
-│   ├── tool-preferences.md        # 统一的工具偏好设置
-│   ├── product.md                 # 产品概述（模板，可选）
-│   ├── tech.md                    # 技术栈（模板，可选）
-│   └── structure.md               # 项目结构（模板，可选）
+├── steering/                      # Project conventions and standards
+│   ├── tool-preferences.md        # Unified tool preferences
+│   ├── product.md                 # Product overview (template, optional)
+│   ├── tech.md                    # Technology stack (template, optional)
+│   └── structure.md               # Project structure (template, optional)
 └── powers/
     └── installed/
         ├── ripgrep/
         │   ├── POWER.md
         │   └── steering/
         │       ├── skill.md
-        │       └── tool-preferences.md  # 技能内的配置
+        │       └── tool-preferences.md  # Skill-specific configuration
         └── ...
 ```
 
-## 核心功能
+## Core Features
 
-### 1. 差异更新
+### 1. Differential Updates
 
-脚本使用 MD5 校验和追踪文件变化：
+The script uses MD5 checksums to track file changes:
 
-- 首次运行：安装所有技能，建立校验和基线
-- 后续运行：只更新有变化的技能
-- 性能提升：5-10 倍（对于未更改的技能）
+- First run: Installs all skills, establishes checksum baseline
+- Subsequent runs: Only updates changed skills
+- Performance improvement: 5-10x (for unchanged skills)
 
-### 2. 自动初始化 Steering
+### 2. Automatic Steering Initialization
 
-每次运行时自动创建缺失的 Steering 模板文件：
+Automatically creates missing Steering template files on each run:
 
-- `product.md` - 产品概述
-- `tech.md` - 技术栈
-- `structure.md` - 项目结构
-- 跳过已存在的文件，不会覆盖
+- `product.md` - Product overview
+- `tech.md` - Technology stack
+- `structure.md` - Project structure
+- Skips existing files, won't overwrite
 
-### 3. 工具偏好设置
+### 3. Tool Preferences
 
-自动处理工具偏好配置：
+Automatically handles tool preference configurations:
 
-- 从 SKILL.md 的 `replaces` 字段自动生成
-- 生成统一的工具偏好汇总到 `~/.kiro/steering/tool-preferences.md`
+- Automatically generates from `replaces` field in SKILL.md
+- Generates unified tool preferences summary in `~/.kiro/steering/tool-preferences.md`
 
-### 4. 修复旧配置
+### 4. Fix Old Configuration
 
-使用 `--fix` 选项修复和验证配置：
+Use `--fix` option to fix and validate configurations:
 
-- 对比文件内容，不一致则重新生成（创建 `.bak` 备份）
-- 一致则跳过，不修改
-- 检测额外的文档并提示删除
-- 修正 `inclusion: auto` → `inclusion: always`
-- **自动清理多余的 powers**
+- Compares file content, regenerates if inconsistent (creates `.bak` backup)
+- Skips if consistent, no modification
+- Detects extra documents and prompts for deletion
+- Corrects `inclusion: auto` → `inclusion: always`
+- **Automatically cleans up excess powers**
 
-#### 清理多余 Powers
+#### Clean Up Excess Powers
 
-`--fix` 功能会自动检测并清理不再对应当前源目录结构的 powers：
+The `--fix` feature automatically detects and cleans up powers that no longer correspond to the current source directory structure:
 
 ```bash
 $ ./kiro-adapter.sh --fix
@@ -175,24 +175,24 @@ Checking for orphaned powers...
 Removed 2 orphaned powers
 ```
 
-**清理场景**：
-- 旧版本遗留的 powers
-- 修改目录结构后的多余 powers
-- 手动删除源文件后的残留 powers
+**Cleanup Scenarios**:
+- Powers left from old versions
+- Excess powers after modifying directory structure
+- Residual powers after manually deleting source files
 
-**安全机制**：
-- 完全通用：基于文件结构判断，无硬编码规则
-- 只删除不在源目录中的 powers
-- 同时清理校验和记录
+**Safety Mechanisms**:
+- Fully generic: Based on file structure judgment, no hardcoded rules
+- Only deletes powers not in source directory
+- Cleans up checksum records simultaneously
 
-### 5. 符合 Kiro 规范
+### 5. Kiro Compliance
 
-- **Steering**: 用于项目约定（工具偏好、API 规范等）
-- 使用正确的 `inclusion` 模式（`always`, `fileMatch`, `manual`）
+- **Steering**: Used for project conventions (tool preferences, API standards, etc.)
+- Uses correct `inclusion` modes (`always`, `fileMatch`, `manual`)
 
-## SKILL.md 格式
+## SKILL.md Format
 
-### 基本格式
+### Basic Format
 
 ```yaml
 ---
@@ -206,9 +206,9 @@ keywords: ["keyword1", "keyword2"]
 Skill content here...
 ```
 
-### 工具替代配置
+### Tool Replacement Configuration
 
-如果你的技能提供了替代内置工具的功能，添加 `replaces` 字段：
+If your skill provides functionality that replaces built-in tools, add the `replaces` field:
 
 ```yaml
 ---
@@ -220,20 +220,20 @@ replaces-description: "Replaces built-in grepSearch with faster ripgrep"
 ---
 ```
 
-脚本会自动生成 `tool-preferences.md` 并复制到全局 steering 目录。
+The script will automatically generate `tool-preferences.md` and copy it to the global steering directory.
 
-## 命令行选项
+## Command Line Options
 
-| 选项 | 简写 | 说明 |
-|------|------|------|
-| `--force` | `-f` | 强制重新安装所有技能，忽略校验和 |
-| `--verbose` | `-v` | 显示详细的处理过程信息 |
-| `--fix` | - | 修复旧版本配置（迁移旧环境） |
-| `--help` | `-h` | 显示帮助信息 |
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--force` | `-f` | Force reinstall all skills, ignore checksums |
+| `--verbose` | `-v` | Show detailed processing information |
+| `--fix` | - | Fix old version configuration (migrate old environment) |
+| `--help` | `-h` | Show help information |
 
-## 输出示例
+## Output Example
 
-### 正常运行
+### Normal Run
 
 ```
 === Kiro Skills Adapter ===
@@ -258,67 +258,67 @@ Powers are in: /Users/username/.kiro/powers/installed
 Restart Kiro to load the powers
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 问题 1：技能没有更新
+### Issue 1: Skill Not Updating
 
 ```bash
-# 强制重装
+# Force reinstall
 ./kiro-adapter.sh --force
 
-# 或删除校验和记录
+# Or delete checksum records
 rm ~/.kiro/powers/.checksums
 ./kiro-adapter.sh
 ```
 
-### 问题 2：从旧版本迁移或验证配置
+### Issue 2: Migrating from Old Version or Validating Configuration
 
 ```bash
-# 修复和验证配置
+# Fix and validate configuration
 ./kiro-adapter.sh --fix
 
-# 查看详细输出
+# View detailed output
 ./kiro-adapter.sh --fix --verbose
 ```
 
-`--fix` 会：
-- 对比文件内容，不一致则重新生成
-- 创建 `.bak` 备份文件
-- 检测并提示删除额外的文件
+`--fix` will:
+- Compare file content, regenerate if inconsistent
+- Create `.bak` backup files
+- Detect and prompt for deletion of extra files
 
-### 问题 3：技能安装后不生效
+### Issue 3: Skill Not Taking Effect After Installation
 
 ```bash
-# 检查安装目录
+# Check installation directory
 ls -la ~/.kiro/powers/installed/
 
-# 检查 agent 配置
+# Check agent configuration
 cat ~/.kiro/agents/default.json
 
-# 重启 Kiro
+# Restart Kiro
 ```
 
-## 最佳实践
+## Best Practices
 
-### 1. 日常开发工作流
+### 1. Daily Development Workflow
 
 ```bash
-# 1. 修改技能文件
+# 1. Modify skill files
 vim ~/.kiro/skills/my-skill/SKILL.md
 
-# 2. 运行差异更新（自动初始化 Steering）
+# 2. Run differential update (automatically initializes Steering)
 ./kiro-adapter.sh
 
-# 3. 重启 Kiro 加载更新
+# 3. Restart Kiro to load updates
 ```
 
-### 2. 创建新技能
+### 2. Creating New Skills
 
 ```bash
-# 1. 创建技能目录
+# 1. Create skill directory
 mkdir -p ~/.kiro/skills/my-new-skill
 
-# 2. 创建 SKILL.md
+# 2. Create SKILL.md
 cat > ~/.kiro/skills/my-new-skill/SKILL.md <<'EOF'
 ---
 name: "my-new-skill"
@@ -331,54 +331,54 @@ keywords: ["custom", "tool"]
 Skill content here...
 EOF
 
-# 3. 安装
+# 3. Install
 ./kiro-adapter.sh
 ```
 
-### 3. 自定义 Steering 配置
+### 3. Customizing Steering Configuration
 
 ```bash
-# Steering 模板会自动创建，直接编辑即可
+# Steering templates are automatically created, just edit them directly
 vim ~/.kiro/steering/product.md
 vim ~/.kiro/steering/tech.md
 vim ~/.kiro/steering/structure.md
 
-# 重启 Kiro 加载配置
+# Restart Kiro to load configuration
 ```
 
-### 3. 添加参考文档和模板
+### 3. Adding Reference Documentation and Templates
 
 ```bash
-# 创建目录
+# Create directories
 mkdir -p ~/.kiro/skills/my-skill/references
 mkdir -p ~/.kiro/skills/my-skill/templates
 
-# 添加文件
+# Add files
 echo "# Reference" > ~/.kiro/skills/my-skill/references/guide.md
 echo "# Template" > ~/.kiro/skills/my-skill/templates/example.sh
 
-# 重新安装以更新索引
+# Reinstall to update index
 ./kiro-adapter.sh
 ```
 
-### 4. 从旧版本迁移
+### 4. Migrating from Old Version
 
 ```bash
-# 修复旧配置
+# Fix old configuration
 ./kiro-adapter.sh --fix
 
-# 正常安装
+# Normal installation
 ./kiro-adapter.sh
 ```
 
-- **bash**: Shell 脚本解释器
-- **jq**: JSON 处理工具
-- **md5** (macOS) 或 **md5sum** (Linux): 计算校验和
+- **bash**: Shell script interpreter
+- **jq**: JSON processing tool
+- **md5** (macOS) or **md5sum** (Linux): Checksum calculation
 
-### 安装依赖
+### Installing Dependencies
 
 ```bash
-# macOS (使用 Homebrew)
+# macOS (using Homebrew)
 brew install jq
 
 # Ubuntu/Debian
@@ -388,72 +388,72 @@ sudo apt-get install jq
 sudo yum install jq
 ```
 
-## 文档
+## Documentation
 
-- 📚 [快速开始](./QUICKSTART.md) - 5 分钟上手指南
-- 🔄 [迁移指南](./MIGRATION.md) - 从旧版本迁移
-- 📝 [更新说明](./UPDATE-NOTES.md) - 最新变更详情
-- 📖 [安装指南（中文）](./docs/INSTALL-GUIDE-ZH.md) - 详细的中文文档
-- 📖 [安装指南（英文）](./docs/INSTALL-GUIDE.md) - 详细的英文文档
-- 📋 [Steering 文件指南](./docs/STEERING-FILES-GUIDE.md) - Steering 文件完整指南
-- 🔍 [Steering 和 Skills 分析](./docs/STEERING-SKILLS-ANALYSIS.md) - 官方规范分析
-- 📁 [项目结构](./PROJECT-STRUCTURE.md) - 项目组织说明
+- 📚 [Quick Start](./QUICKSTART-EN.md) - 5-minute quick start guide
+- 🔄 [Migration Guide](./MIGRATION-EN.md) - Migrating from old versions
+- 📝 [Update Notes](./UPDATE-NOTES.md) - Latest change details
+- 📖 [Installation Guide (Chinese)](./docs/INSTALL-GUIDE-ZH.md) - Detailed Chinese documentation
+- 📖 [Installation Guide (English)](./docs/INSTALL-GUIDE.md) - Detailed English documentation
+- 📋 [Steering Files Guide](./docs/STEERING-FILES-GUIDE.md) - Complete guide for Steering files
+- 🔍 [Steering and Skills Analysis](./docs/STEERING-SKILLS-ANALYSIS.md) - Official specification analysis
+- 📁 [Project Structure](./PROJECT-STRUCTURE-EN.md) - Project organization explanation
 
-## 更新日志
+## Changelog
 
-### v3.2.0 - 自动清理多余 Powers
+### v3.2.0 - Auto Cleanup of Excess Powers
 
-- ✨ **自动清理多余 powers**: `--fix` 模式下自动检测并清理
-- ✨ **智能识别**: 基于源目录结构构建期望列表
-- ✨ **安全机制**: 白名单保护，只删除多余项
-- ✨ **清晰反馈**: 显示清理进度和统计
-- 🔧 增强 `--fix` 功能：不仅修复配置，还清理多余 powers
-- 📝 新增 `FIX-FEATURE-UPDATE.md` 文档
+- ✨ **Auto cleanup of excess powers**: `--fix` mode automatically detects and cleans up
+- ✨ **Smart identification**: Builds expected list based on source directory structure
+- ✨ **Safety mechanism**: Whitelist protection, only deletes excess items
+- ✨ **Clear feedback**: Shows cleanup progress and statistics
+- 🔧 Enhanced `--fix` functionality: Not only fixes configuration but also cleans up excess powers
+- 📝 Added `FIX-FEATURE-UPDATE.md` documentation
 
-### v3.1.0 - 模板外部化
+### v3.1.0 - Template Externalization
 
-- ✨ **模板外部化**：将所有 Steering 模板移到 `templates/steering/` 目录
-- ✨ **改进可维护性**：不再在脚本中嵌入大量文本
-- ✨ **易于自定义**：可以直接编辑模板文件
-- ✨ **新增 powers.md 模板**：介绍 Kiro Powers 系统
-- 📝 添加 `templates/README.md` 说明文档
-- 🔧 优化 `initialize_steering_templates()` 函数
-- 🔧 优化 `fix_old_configuration()` 函数
+- ✨ **Template externalization**: Moved all Steering templates to `templates/steering/` directory
+- ✨ **Improved maintainability**: No longer embedding large text in scripts
+- ✨ **Easy customization**: Can directly edit template files
+- ✨ **Added powers.md template**: Introduces Kiro Powers system
+- 📝 Added `templates/README.md` documentation
+- 🔧 Optimized `initialize_steering_templates()` function
+- 🔧 Optimized `fix_old_configuration()` function
 
-### v3.0.0 - 简化和自动化
+### v3.0.0 - Simplification and Automation
 
-- ✨ **自动初始化 Steering**：每次运行自动创建缺失的模板
-- ✨ **新增 `--fix` 选项**：修复旧版本配置
-- 🔥 **移除 `--init-steering`**：不再需要单独初始化
-- ✨ 智能跳过已存在的文件
-- ✨ 自动修正 inclusion 模式
-- 📝 简化用户体验
+- ✨ **Automatic Steering initialization**: Automatically creates missing templates on each run
+- ✨ **New `--fix` option**: Fixes old version configuration
+- 🔥 **Removed `--init-steering`**: No longer needed for separate initialization
+- ✨ Smartly skips existing files
+- ✨ Automatically corrects inclusion mode
+- 📝 Simplified user experience
 
-### v2.0.0 - 符合 Kiro 规范
+### v2.0.0 - Kiro Compliance
 
-- ✨ 修正 Steering 的使用
-- ✨ 修正 `inclusion` 模式（`auto` → `always`）
-- ✨ 创建标准 Steering 文件模板
+- ✨ Corrected use of Steering
+- ✨ Corrected `inclusion` mode (`auto` → `always`)
+- ✨ Created standard Steering file templates
 
-### v1.0.0 - 差异更新版本
+### v1.0.0 - Differential Update Version
 
-- ✨ 新增差异检测功能
-- ✨ 新增 MD5 校验和追踪
-- ✨ 新增 `--force` 强制重装选项
-- ✨ 新增 `--verbose` 详细输出选项
-- ✨ 改进状态显示（NEW/UPDATE/Up to date）
-- ✨ 优化性能，跳过未更改的技能
+- ✨ Added differential detection functionality
+- ✨ Added MD5 checksum tracking
+- ✨ Added `--force` option for forced reinstallation
+- ✨ Added `--verbose` option for detailed output
+- ✨ Improved status display (NEW/UPDATE/Up to date)
+- ✨ Optimized performance, skips unchanged skills
 
-## 贡献
+## Contribution
 
-欢迎提交问题和改进建议！
+Welcome to submit issues and improvement suggestions!
 
-## 许可证
+## License
 
 MIT License
 
-## 相关链接
+## Related Links
 
-- [Kiro 官方文档](https://kiro.dev/docs/)
-- [Kiro Steering 文档](https://kiro-community.github.io/book-of-kiro/en/features/steering/)
-- [Kiro Skills 更新日志](https://kiro.dev/changelog/cli/1-24)
+- [Kiro Official Documentation](https://kiro.dev/docs/)
+- [Kiro Steering Documentation](https://kiro-community.github.io/book-of-kiro/en/features/steering/)
+- [Kiro Skills Changelog](https://kiro.dev/changelog/cli/1-24)

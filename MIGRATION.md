@@ -1,128 +1,128 @@
-# 迁移指南
+# Migration Guide
 
-## 从旧版本迁移
+## Migrating from Old Versions
 
-如果你之前使用过旧版本的 `kiro-adapter.sh`，建议运行修复命令以确保配置正确。
+If you've used previous versions of `kiro-adapter.sh`, it's recommended to run the fix command to ensure correct configuration.
 
-## 快速迁移
+## Quick Migration
 
 ```bash
-# 1. 更新代码
+# 1. Update code
 git pull
 
-# 2. 运行修复（可选，推荐）
+# 2. Run fix (optional, recommended)
 ./kiro-adapter.sh --fix
 
-# 3. 正常使用
+# 3. Normal usage
 ./kiro-adapter.sh
 ```
 
-## --fix 功能说明
+## --fix Feature Explanation
 
-`--fix` 选项会：
+The `--fix` option will:
 
-1. **修复 Steering 配置**
-   - 对比文件内容与标准模板
-   - 不一致则重新生成（创建 `.bak` 备份）
-   - 一致则跳过，不修改
-   - 修正 `inclusion: auto` → `inclusion: always`
+1. **Fix Steering Configuration**
+   - Compare file content with standard templates
+   - Regenerate if inconsistent (creates `.bak` backup)
+   - Skip if consistent, no modification
+   - Correct `inclusion: auto` → `inclusion: always`
 
-2. **清理多余 Powers**
-   - 扫描源目录，构建期望的 powers 列表
-   - 对比已安装的 powers
-   - 自动删除不在源目录中的 powers
-   - 同时清理校验和记录
+2. **Clean Up Excess Powers**
+   - Scan source directory, build expected powers list
+   - Compare with installed powers
+   - Automatically delete powers not in source directory
+   - Clean up checksum records simultaneously
 
-## 验证迁移
+## Verify Migration
 
-### 检查文件结构
+### Check File Structure
 
 ```bash
-# Steering 目录
+# Steering directory
 ls ~/.kiro/steering/
-# 应该看到：
+# Should see:
 # - tool-preferences.md
-# - product.md, tech.md, structure.md, powers.md（模板）
+# - product.md, tech.md, structure.md, powers.md (templates)
 
-# Powers 目录
+# Powers directory
 ls ~/.kiro/powers/installed/
-# 应该看到你的技能，如：
+# Should see your skills, such as:
 # - ripgrep
 # - sharkdp-fd
 # - rust-skills-*
-# - 等等
+# - etc.
 ```
 
-### 检查 Frontmatter
+### Check Frontmatter
 
 ```bash
-# 检查 Steering 文件
+# Check Steering files
 head -5 ~/.kiro/steering/tool-preferences.md
-# 应该看到：
+# Should see:
 # ---
 # description: "..."
 # inclusion: always
 # ---
 ```
 
-## 常见问题
+## Common Questions
 
-### Q: --fix 会覆盖我的自定义内容吗？
+### Q: Will --fix overwrite my custom content?
 
-A: 不会。`--fix` 会对比文件内容：
-- 如果内容一致，跳过
-- 如果内容不同，重新生成并创建 `.bak` 备份
-- 你可以从备份文件中恢复自定义内容
+A: No. `--fix` will compare file content:
+- If content is consistent, skip
+- If content is different, regenerate and create `.bak` backup
+- You can restore custom content from backup files
 
-### Q: 我需要运行 --fix 吗？
+### Q: Do I need to run --fix?
 
-A: 建议在以下情况下运行：
-- 从旧版本升级
-- 怀疑配置文件被修改
-- 想验证配置是否正确
-- 发现有多余的 powers
+A: It's recommended to run in the following cases:
+- Upgrading from old version
+- Suspecting configuration files have been modified
+- Wanting to verify configuration correctness
+- Finding excess powers
 
-### Q: --fix 是否安全？
+### Q: Is --fix safe?
 
-A: 是的，`--fix` 是安全的：
-- 会创建备份文件（`.bak`）
-- 只删除不在源目录中的 powers
-- 不会影响源文件
+A: Yes, `--fix` is safe:
+- Will create backup files (`.bak`)
+- Only deletes powers not in source directory
+- Won't affect source files
 
-### Q: 如何回滚？
+### Q: How to rollback?
 
-A: 如果需要回滚：
+A: If rollback is needed:
 
 ```bash
-# 恢复 Steering 文件
+# Restore Steering files
 cp ~/.kiro/steering/product.md.bak ~/.kiro/steering/product.md
 
-# 重新安装 powers（如果误删）
+# Reinstall powers (if accidentally deleted)
 ./kiro-adapter.sh --force
 ```
 
-## 命令对照表
+## Command Reference
 
-| 功能 | 命令 |
-|------|------|
-| 正常安装 | `./kiro-adapter.sh` |
-| 修复配置 | `./kiro-adapter.sh --fix` |
-| 强制重装 | `./kiro-adapter.sh --force` |
-| 详细输出 | `./kiro-adapter.sh --verbose` |
-| 查看帮助 | `./kiro-adapter.sh --help` |
+| Function | Command |
+|----------|---------|
+| Normal installation | `./kiro-adapter.sh` |
+| Fix configuration | `./kiro-adapter.sh --fix` |
+| Force reinstall | `./kiro-adapter.sh --force` |
+| Detailed output | `./kiro-adapter.sh --verbose` |
+| View help | `./kiro-adapter.sh --help` |
 
-## 获取帮助
+## Get Help
 
-如果迁移过程中遇到问题：
+If you encounter issues during migration:
 
-1. 查看 [README.md](./README.md)
-2. 查看 [QUICKSTART.md](./QUICKSTART.md)
-3. 查看 [CHANGELOG.md](./CHANGELOG.md)
-4. 提交 Issue
+1. Check [README.md](./README-EN.md)
+2. Check [QUICKSTART.md](./QUICKSTART-EN.md)
+3. Check [CHANGELOG.md](./CHANGELOG.md)
+4. Submit an Issue
 
-## 相关文档
+## Related Documentation
 
-- [README.md](./README.md) - 完整文档
-- [QUICKSTART.md](./QUICKSTART.md) - 快速开始指南
-- [CHANGELOG.md](./CHANGELOG.md) - 更新日志
-- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) - 项目结构
+- [README.md](./README-EN.md) - Complete documentation
+- [QUICKSTART.md](./QUICKSTART-EN.md) - Quick start guide
+- [CHANGELOG.md](./CHANGELOG.md) - Changelog
+- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE-EN.md) - Project structure

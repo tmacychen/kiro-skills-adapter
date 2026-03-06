@@ -1,156 +1,156 @@
-# 快速开始
+# Quick Start
 
-## 5 分钟上手指南
+## 5-Minute Quick Start Guide
 
-### 1. 安装
+### 1. Installation
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone <repository-url>
 cd kiro-skills-adapter
 
-# 赋予执行权限
+# Make executable
 chmod +x kiro-adapter.sh
 ```
 
-### 2. 准备技能
+### 2. Prepare Skills
 
-将你的技能放在以下位置之一：
+Place your skills in one of the following locations:
 
-- `~/.kiro/skills/` （推荐）
-- 当前目录（包含 SKILL.md 文件）
+- `~/.kiro/skills/` (recommended)
+- Current directory (containing SKILL.md files)
 
-### 3. 运行安装
+### 3. Run Installation
 
 ```bash
-# 首次安装（自动初始化 Steering 模板）
+# First installation (automatically initializes Steering templates)
 ./kiro-adapter.sh
 
-# 如果从旧版本迁移
+# If migrating from old version
 ./kiro-adapter.sh --fix
 ```
 
-### 4. 重启 Kiro
+### 4. Restart Kiro
 
-重启 Kiro IDE 以加载新安装的 Powers 和 Steering 配置。
+Restart Kiro IDE to load newly installed Powers and Steering configurations.
 
-## 常用命令
+## Common Commands
 
 ```bash
-# 查看帮助
+# View help
 ./kiro-adapter.sh --help
 
-# 修复旧配置
+# Fix old configuration
 ./kiro-adapter.sh --fix
 
-# 详细输出
+# Detailed output
 ./kiro-adapter.sh --verbose
 
-# 强制重装
+# Force reinstall
 ./kiro-adapter.sh --force
 ```
 
-## 验证安装
+## Verify Installation
 
-### 检查 Powers
+### Check Powers
 
 ```bash
 ls ~/.kiro/powers/installed/
 ```
 
-应该看到：
-- `ripgrep/` - 如果安装了 ripgrep
-- `sharkdp-fd/` - 如果安装了 fd
-- 其他已安装的技能
+You should see:
+- `ripgrep/` - if ripgrep is installed
+- `sharkdp-fd/` - if fd is installed
+- Other installed skills
 
-### 检查 Steering
+### Check Steering
 
 ```bash
 ls ~/.kiro/steering/
 ```
 
-**首次运行后**，应该看到：
-- `tool-preferences.md` - 统一的工具偏好设置（包含所有工具配置）
-- `product.md`, `tech.md`, `structure.md`, `powers.md` - 自动创建的标准模板
+**After first run**, you should see:
+- `tool-preferences.md` - unified tool preferences (contains all tool configurations)
+- `product.md`, `tech.md`, `structure.md`, `powers.md` - automatically created standard templates
 
-> 💡 **注意**：Steering 模板会在首次运行时自动创建，你可以直接编辑它们来自定义项目配置。
+> 💡 **Note**: Steering templates will be automatically created on first run, you can edit them directly to customize project configuration.
 
-### 在 Kiro 中测试
+### Test in Kiro
 
-打开 Kiro，尝试：
-
-```
-"Use rg to search for 'function' in this project"
-```
-Kiro 会优先使用 `rg` 命令而不是内置的 `grepSearch`。
-
-```
-"Use fd to find all .md files"
-```
-Kiro 会优先使用 `fd` 命令而不是内置的 `fileSearch`。
+Open Kiro and try:
 
 ```
 "Use rg to search for 'function' in this project"
 ```
-Kiro 会优先使用 `rg` 命令而不是内置的 `grepSearch`。
+Kiro will prefer `rg` command over built-in `grepSearch`.
 
 ```
 "Use fd to find all .md files"
 ```
-Kiro 会优先使用 `fd` 命令而不是内置的 `fileSearch`。
+Kiro will prefer `fd` command over built-in `fileSearch`.
 
-## 完整设置
+```
+"Use rg to search for 'function' in this project"
+```
+Kiro will prefer `rg` command over built-in `grepSearch`.
 
-Steering 模板会在首次运行时自动创建：
+```
+"Use fd to find all .md files"
+```
+Kiro will prefer `fd` command over built-in `fileSearch`.
+
+## Complete Setup
+
+Steering templates will be automatically created on first run:
 
 ```bash
 ./kiro-adapter.sh
 ```
 
-创建的文件：
+Created files:
 
-### 默认文件（自动创建）
-- `product.md` - 产品概述
-- `tech.md` - 技术栈
-- `structure.md` - 项目结构
-- `powers.md` - Powers 系统介绍
+### Default Files (Automatically Created)
+- `product.md` - Product overview
+- `tech.md` - Technology stack
+- `structure.md` - Project structure
+- `powers.md` - Powers system introduction
 
-### 常用文件（可选，手动创建）
-- `api-standards.md` - API 规范
-- `testing-standards.md` - 测试方法论
-- `code-conventions.md` - 代码风格
-- `security-policies.md` - 安全指南
-- `deployment-workflow.md` - 部署流程
+### Common Files (Optional, Manually Created)
+- `api-standards.md` - API standards
+- `testing-standards.md` - Testing methodology
+- `code-conventions.md` - Code style
+- `security-policies.md` - Security guidelines
+- `deployment-workflow.md` - Deployment process
 
-> 💡 **提示**：默认模板包含占位符，你需要根据项目实际情况填写内容。
+> 💡 **Tip**: Default templates contain placeholders, you need to fill in content according to your project's actual situation.
 
-## 下一步
+## Next Steps
 
-- 阅读 [完整文档](./README.md)
-- 了解 [项目结构](./PROJECT-STRUCTURE.md)
-- 查看 [更新日志](./CHANGELOG.md)
+- Read [Complete Documentation](./README-EN.md)
+- Learn about [Project Structure](./PROJECT-STRUCTURE-EN.md)
+- Check [Changelog](./CHANGELOG.md)
 
-## 常见问题
+## Common Questions
 
-### Q: 技能没有更新？
+### Q: Skill not updating?
 
 ```bash
 ./kiro-adapter.sh --force
 ```
 
-### Q: Kiro 没有识别技能？
+### Q: Kiro not recognizing skills?
 
-1. 检查安装目录：`ls ~/.kiro/powers/installed/`
-2. 重启 Kiro
-3. 如果从旧版本迁移：`./kiro-adapter.sh --fix`
+1. Check installation directory: `ls ~/.kiro/powers/installed/`
+2. Restart Kiro
+3. If migrating from old version: `./kiro-adapter.sh --fix`
 
-### Q: 如何添加新技能？
+### Q: How to add new skills?
 
 ```bash
-# 1. 创建技能目录
+# 1. Create skill directory
 mkdir -p ~/.kiro/skills/my-skill
 
-# 2. 创建 SKILL.md
+# 2. Create SKILL.md
 cat > ~/.kiro/skills/my-skill/SKILL.md <<'EOF'
 ---
 name: "my-skill"
@@ -163,12 +163,12 @@ keywords: ["custom"]
 Content here...
 EOF
 
-# 3. 安装
+# 3. Install
 ./kiro-adapter.sh
 ```
 
-## 获取帮助
+## Get Help
 
-- 查看 [文档目录](./docs/)
-- 提交 Issue
-- 阅读 [README](./README.md)
+- Check [Documentation Directory](./docs/)
+- Submit an Issue
+- Read [README](./README-EN.md)
