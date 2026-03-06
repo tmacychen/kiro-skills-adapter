@@ -73,6 +73,22 @@ echo
 
 mkdir -p "$POWERS_DIR" "$INSTALLED_DIR"
 
+# Function to calculate file checksum
+calculate_file_checksum() {
+    local file="$1"
+    if [ -f "$file" ]; then
+        if command -v md5 &> /dev/null; then
+            md5 -q "$file"
+        elif command -v md5sum &> /dev/null; then
+            md5sum "$file" | awk '{print $1}'
+        else
+            echo "CHECKSUM_NOT_AVAILABLE"
+        fi
+    else
+        echo "FILE_NOT_FOUND"
+    fi
+}
+
 # Function to fix old configuration
 fix_old_configuration() {
     local steering_dir="$HOME/.kiro/steering"
@@ -89,11 +105,13 @@ fix_old_configuration() {
         return 1
     fi
     
+    mkdir -p "$steering_dir"
+    
     # Check if file is expected
     is_expected_file() {
         local filename="$1"
         case "$filename" in
-            "product.md"|"tech.md"|"structure.md"|"powers.md"|"tool-preferences.md")
+            "product.md"|"tech.md"|"structure.md"|"powers.md"|"tool-preferences.md"|"ai-guidelines.md")
                 return 0
                 ;;
             *)
@@ -112,23 +130,26 @@ fix_old_configuration() {
         # Skip tool-preferences.md as it's auto-generated
         [ "$filename" = "tool-preferences.md" ] && continue
         
+        # Calculate checksums
+        local template_checksum=$(calculate_file_checksum "$template_file")
+        local file_checksum=$(calculate_file_checksum "$filepath")
+        
         if [ -f "$filepath" ]; then
-            # File exists, compare content
-            local expected_content=$(cat "$template_file")
-            local actual_content=$(cat "$filepath")
-            
-            if [ "$expected_content" != "$actual_content" ]; then
+            # File exists, compare checksums
+            if [ "$file_checksum" != "$template_checksum" ]; then
                 # Content differs, backup and regenerate
                 cp "$filepath" "$filepath.bak"
                 cp "$template_file" "$filepath"
                 echo -e "  ${YELLOW}⟳${NC} Regenerated $filename (backup: $filename.bak)"
+                echo -e "     ${GRAY}Source: $template_checksum${NC}"
+                echo -e "     ${GRAY}Target: $file_checksum${NC}"
                 ((regenerated_count++))
             else
+                # Checksums match
                 echo -e "  ${GREEN}✓${NC} $filename is up to date"
             fi
         else
             # File doesn't exist, create it
-            mkdir -p "$steering_dir"
             cp "$template_file" "$filepath"
             echo -e "  ${GREEN}✓${NC} Created $filename"
             ((fixed_count++))
@@ -169,7 +190,7 @@ fix_old_configuration() {
     if [ $fixed_count -eq 0 ] && [ $regenerated_count -eq 0 ] && [ -z "$extra_files" ]; then
         echo -e "${GREEN}✓ Configuration is up to date${NC}"
     else
-        [ $fixed_count -gt 0 ] && echo -e "${GREEN}Created $fixed_count files${NC}"
+        [ $fixed_count -gt 0 ] && echo -e "${GREEN}Created/fixed $fixed_count files${NC}"
         [ $regenerated_count -gt 0 ] && echo -e "${YELLOW}Regenerated $regenerated_count files${NC}"
         
         if [ -n "$extra_files" ]; then

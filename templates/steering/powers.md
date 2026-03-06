@@ -17,7 +17,6 @@ When you need to perform a task, Kiro automatically discovers and loads relevant
 
 1. **Listing powers**: Check `~/.kiro/powers/installed/` directory
 2. **Reading power documentation**: Each power has a `steering/skill.md` file
-3. **Using skills-index**: Ask "What skills are available?"
 
 ### Power Structure
 
@@ -54,11 +53,6 @@ When you need a specific capability:
    cat ~/.kiro/powers/installed/[power-name]/steering/skill.md
    ```
 
-3. **Check skills index**:
-   ```bash
-   cat ~/.kiro/powers/installed/skills-index/steering/skill.md
-   ```
-
 ### Activating Powers
 
 Powers are activated by:
@@ -78,8 +72,7 @@ When multiple tools are available, prefer:
 
 When entering a new project or task:
 1. List available powers: `ls ~/.kiro/powers/installed/`
-2. Check skills index: "What skills are available?"
-3. Read relevant power documentation
+2. Read relevant power documentation
 
 ### 2. Use Specialized Tools
 
@@ -96,7 +89,6 @@ Each power may have specific conventions documented in its `skill.md` file.
 
 When unsure:
 - Read the power's `steering/skill.md`
-- Check `~/.kiro/powers/installed/skills-index/steering/skill.md`
 - Look for examples in the power's directory
 
 ## Power Categories
@@ -113,7 +105,6 @@ Provide utility functions (browser automation, testing, etc.)
 ## Quick Reference
 
 - **Powers directory**: `~/.kiro/powers/installed/`
-- **Skills index**: `~/.kiro/powers/installed/skills-index/steering/skill.md`
 - **Tool preferences**: `~/.kiro/steering/tool-preferences.md`
 - **Adapter script**: `./kiro-adapter.sh`
 
