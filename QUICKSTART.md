@@ -126,8 +126,8 @@ Created files:
 
 ## Next Steps
 
-- Read [Complete Documentation](./README-EN.md)
-- Learn about [Project Structure](./PROJECT-STRUCTURE-EN.md)
+- Read [Complete Documentation](./README.md)
+- Learn about [Project Structure](./PROJECT-STRUCTURE.md)
 - Check [Changelog](./CHANGELOG.md)
 
 ## Common Questions
@@ -171,4 +171,4 @@ EOF
 
 - Check [Documentation Directory](./docs/)
 - Submit an Issue
-- Read [README](./README-EN.md)
+- Read [README](./README.md)

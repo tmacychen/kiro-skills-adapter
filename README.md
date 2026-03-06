@@ -2,7 +2,7 @@
 
 An intelligent installation tool that converts Skills from any directory to Kiro Powers format.
 
-> 📖 **New user?** Check out the [Quick Start Guide](./QUICKSTART-EN.md) to get started in 5 minutes!
+> 📖 **New user?** Check out the [Quick Start Guide](./QUICKSTART.md) to get started in 5 minutes!
 
 ## Features
 
@@ -390,14 +390,14 @@ sudo yum install jq
 
 ## Documentation
 
-- 📚 [Quick Start](./QUICKSTART-EN.md) - 5-minute quick start guide
-- 🔄 [Migration Guide](./MIGRATION-EN.md) - Migrating from old versions
+- 📚 [Quick Start](./QUICKSTART.md) - 5-minute quick start guide
+- 🔄 [Migration Guide](./MIGRATION.md) - Migrating from old versions
 - 📝 [Update Notes](./UPDATE-NOTES.md) - Latest change details
 - 📖 [Installation Guide (Chinese)](./docs/INSTALL-GUIDE-ZH.md) - Detailed Chinese documentation
 - 📖 [Installation Guide (English)](./docs/INSTALL-GUIDE.md) - Detailed English documentation
 - 📋 [Steering Files Guide](./docs/STEERING-FILES-GUIDE.md) - Complete guide for Steering files
 - 🔍 [Steering and Skills Analysis](./docs/STEERING-SKILLS-ANALYSIS.md) - Official specification analysis
-- 📁 [Project Structure](./PROJECT-STRUCTURE-EN.md) - Project organization explanation
+- 📁 [Project Structure](./PROJECT-STRUCTURE.md) - Project organization explanation
 
 ## Changelog
 
@@ -450,7 +450,7 @@ Welcome to submit issues and improvement suggestions!
 
 ## License
 
-MIT License
+GNU General Public License v3
 
 ## Related Links
 

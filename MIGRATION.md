@@ -115,14 +115,14 @@ cp ~/.kiro/steering/product.md.bak ~/.kiro/steering/product.md
 
 If you encounter issues during migration:
 
-1. Check [README.md](./README-EN.md)
-2. Check [QUICKSTART.md](./QUICKSTART-EN.md)
+1. Check [README.md](./README.md)
+2. Check [QUICKSTART.md](./QUICKSTART.md)
 3. Check [CHANGELOG.md](./CHANGELOG.md)
 4. Submit an Issue
 
 ## Related Documentation
 
-- [README.md](./README-EN.md) - Complete documentation
-- [QUICKSTART.md](./QUICKSTART-EN.md) - Quick start guide
+- [README.md](./README.md) - Complete documentation
+- [QUICKSTART.md](./QUICKSTART.md) - Quick start guide
 - [CHANGELOG.md](./CHANGELOG.md) - Changelog
-- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE-EN.md) - Project structure
+- [PROJECT-STRUCTURE.md](./PROJECT-STRUCTURE.md) - Project structure
